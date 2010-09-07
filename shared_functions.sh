@@ -1,15 +1,19 @@
 DIRNAME0=`dirname "$0"`
 #ROOT_OUTDIR="$DIRNAME0/out"
-OUTDIR="$ROOT_OUTDIR"
+#OUTDIR="$ROOT_OUTDIR"
+
+OUTDIR="$TMP_DIR"
+STATUS_FILE="$TMP_DIR"/log.status
 #OUTDIR="$DIRNAME0/out"
+DEBUG_FILE="$TMP_DIR"/debug
+if [ -z "$dotLYX" ]
+then
+	dotLYX=.lyx # The lyx setting directory is ~/$dotLYX
+fi
+
 THIS_PID=$$
 
-#kill(){
-#	echo kill
-#}
-#killall (){
-#	echo killall
-#}
+WINDOW_MANAGER=icewm
 
 mkdirp () {
 	mkdir -p "$1"
@@ -17,16 +21,57 @@ mkdirp () {
 } 
 
 kill_all_children() {
+	echo killing all children of PID $1 by $$
+        echo kill `$DIRNAME0/list_all_children.sh $1`
         kill `$DIRNAME0/list_all_children.sh $1`
+	echo killed
         sleep 0.1
+	echo killing 9 all children of PID $1
+        echo kill -9 `$DIRNAME0/list_all_children.sh $1`
         kill -9 `$DIRNAME0/list_all_children.sh $1`
 }
+
+store_result() {
+if [ -z "$NO_STORE_RESULT" ]
+then
+	#move result to permanent storage
+	PREFIX=$(echo $(echo $OUTDIR | egrep -o '/[[:alnum:]]+.KEYCODEpure.replay' | sed 's/^.//' | sed s/.KEYCODEpure.replay//g) | sed 's/[[:space:]]/_/g')
+
+	echo store_result "$@"	
+	STORE_DIR=$ROOT_OUTDIR/$1
+	mkdirp $STORE_DIR
+	for F in $OUTDIR/$SEC*
+	do 
+		NEW_NAME="$PREFIX_"$(basename $F)
+		cp $F $STORE_DIR/$NEW_NAME
+	done
+	get_version_info "$STORE_DIR/$PREFIX_$SEC".info
+	if [ "$1" = "final" ]
+	then
+		tar -c $OUTDIR | gzip -9 > $ROOT_OUTDIR/final/$PREFIX_$SEC.tar.gz && (
+			GDB_BAK=$GDB
+			GDB=$OUTDIR/$LAST_CRASH_SEC.GDB
+			CONFIRM_FILE=`calc_confirm_file`
+			echo Reproducible > "$CONFIRM_FILE"
+			(echo ---- CONF BEGIN
+			set | egrep '^(CONFIRM_FILE|GDB|WANT_CRASH_I)'
+			echo ls "$GDB" ----
+			ls "$GDB"
+			echo ls $OUTDIR/$SEC* ---
+			ls $OUTDIR/$SEC*
+			echo ---- CONF END
+			echo) >> $DEBUG_FILE
+			GDB=$GDB_BAK
+		)
+	fi
+fi
+}	
 
 
 #BORED_AFTER_SECS=7200 #If we have spent more than 3600 secs (an hour) replaying a file, without learning anything new, go and start looking for more bugs instead
 if [ -z $BORED_AFTER_SECS ]
 then
-	BORED_AFTER_SECS=3600 #If we have spent more than 3600 secs (an hour) replaying a file, without learning anything new, go and start looking for more bugs instead
+	BORED_AFTER_SECS=7200 #If we have spent more than 3600 secs (an hour) replaying a file, without learning anything new, go and start looking for more bugs instead
 fi
 
 LAST_CORE=""
@@ -35,9 +80,9 @@ LAST_CORE=""
 # This section of code is LyX Specific
 #############################
 
-if [ ! -e $DIRNAME0/.lyx ]
+if [ ! -e $DIRNAME0/$dotLYX ]
 then
-	echo WARNING $DIRNAME0/.lyx does not exist
+	echo WARNING $DIRNAME0/$dotLYX does not exist A
 	echo will need to regenerate .lyx every test
 fi
 
@@ -93,7 +138,7 @@ extras_prepare () {
 }
 
 get_crash_id () {
-  name=`(cat $GDB | grep -o ' in lyx::[[:alnum:]:]*' ; cat $GDB | grep -o ' [ai][nt] [[:alnum:]:]*' ) | head -n3 | sed s/in// | sed 's/ //g'`
+  name=`(grep -o ' in lyx::[[:alnum:]:]*' < $GDB ; grep -o ' [ai][nt] [[:alnum:]:]*' < $GDB) |  grep -v -i assert | head -n4 | sed s/in// | sed 's/ //g'`
   echo $name | sed 's/ /__/g'
 }
 
@@ -150,6 +195,7 @@ run_gdb () {
 	echo cannot touch $GDB
 	full_exit
   fi
+  echo DISPLAY $DISPLAY
   (sleep 300; echo KILLER ACTIVATIED ;killall gdb lyx ; sleep 1 ; killall -9 gdb lyx)&
   KILLER_PID=$!
   echo KILLING LYX, before starting new lyx
@@ -157,16 +203,17 @@ run_gdb () {
   sleep 1 
   killall lyx -9
   sleep 1
+  mkdirp $NEWHOME/tmp
   echo Starting GDB
   #shell svn info $SRC_DIR/
-  (echo "
-  run
-  bt
   #shell kill $CHILD_PID
+  #shell kill -9 $CHILD_PID
+  (echo "
+  run $EXE_TO_TEST_ARGS 
+  bt
   shell wmctrl -l
   shell sleep 1
-  #shell kill -9 $CHILD_PID
-" ; yes q) | HOME="$NEWHOME" gdb $EXE_TO_TEST 2>&1 | strings|  tee $GDB
+" ; yes q) | HOME="$NEWHOME" TMPDIR="$NEWHOME/tmp" LYX_NO_BACKTRACE_HELPER="y" gdb $EXE_TO_TEST 2>&1 | strings|  tee $GDB ####| head -n40
   echo "end run_gdb ($KILLER_PID)"
   kill $KILLER_PID
   sleep 0.1
@@ -186,7 +233,36 @@ run_gdb () {
 
 ###########################
 
+check_can_write () {
+ TEST_FILE="$1"/.test_can_write
+ if ! touch "$TEST_FILE" 
+ then
+	echo cannot write to "$TEST_FILE", exiting 1>&2
+	full_exit
+ fi
+ rm "$TEST_FILE"
+}
+	
 
+check_relatime () {
+ if ! mount | egrep ' / .*(rel|no)atime'
+ then
+	echo -----------------------------------------
+ 	echo - WARNING!!!!
+	echo - It appears that relatime is not enabled on your root partition
+	echo - This means that every time you access a file, metadata will be updated
+	echo - Keytest reads a *lot* of files
+	echo - Unless you enable relatime or noatime, running keytest will
+	echo -   * Greatly slow down your forground tasks.
+	echo -   * Increase the wear and tear on your harddisk
+	echo -----------------------------------------
+	logger WARNING setting relatime on '/' STRONGLY recommended when running keytest!
+ fi 1>&2
+}
+
+make_status_file () {
+	set | egrep '(BOREDOM|WANT_CRASH_ID)' > $STATUS_FILE
+}
 
 try_replay () {
 	id=`get_crash_id`
@@ -194,15 +270,20 @@ try_replay () {
 	export CONFIRM_FILE=`calc_confirm_file`
 	if [ ! -e "$CONFIRM_FILE" ]
 	then
-		echo $CONFIRM_FILE does not exist
+		echo $CONFIRM_FILE does not exist B
 		echo This bug appears not to have been reproduced before
 		echo Will try to reproduce now
 		echo
-	        echo WANT_CRASH_ID=$WANT_CRASH_ID
+	        #echo WANT_CRASH_ID=$WANT_CRASH_ID
+		mkdir -p $ROOT_OUTDIR/tasks
+		TASK_FILE_NAME=$ROOT_OUTDIR/tasks/$SEC.$id.replay.task
+		echo "replay $KEYCODEpure $id" >> $TASK_FILE_NAME
+		echo "replay $KEYCODEpure $id" >> $ROOT_OUTDIR/tasks.log
 		WANT_CRASH_ID="$id" do_replay
-	        echo _WANT_CRASH_ID=$WANT_CRASH_ID
+	        #echo _WANT_CRASH_ID=$WANT_CRASH_ID
 		echo 
 		echo Finished attempt at replay
+		rm $TASK_FILE_NAME
 	else
 		echo $CONFIRM_FILE exists
 		echo This bugs has already been reproduced
@@ -211,7 +292,8 @@ try_replay () {
 }
 
 do_replay() {
-	(REPLAYFILE="$KEYCODEpure" TAIL_LINES=25 MAX_TAIL_LINES=10000 bash "$0")&
+	echo WANT_CRASH_ID=$WANT_CRASH_ID
+	(REPLAYFILE="$KEYCODEpure" TAIL_LINES=25 MAX_TAIL_LINES=5000 bash "$0")&
 	TEST_PID="$!"
 	echo Backgrounded $TEST_PID
 	echo waiting for $TEST_PID to finish
@@ -246,16 +328,9 @@ do_queued_replay() {
 }
 
 do_queued_replays() {
-REPLAY_DIR=$OUTDIR/toreplay
-echo doing queued_replays
-echo replays `ls $REPLAY_DIR/*KEYCODEpure`
-for f in `ls $REPLAY_DIR/*KEYCODEpure`
-do
-	do_queued_replay
-done
-echo done queued_replays
+  echo doing queued_reproduce_
 (
-  REPLAY_DIR=$OUTDIR/toreproduce
+  REPLAY_DIR=$ROOT_OUTDIR/toreproduce
   export BORED_AFTER_SECS=0
   echo doing queued_reproduce
   echo reproduce`ls $REPLAY_DIR/*KEYCODEpure`
@@ -265,9 +340,21 @@ echo done queued_replays
   done
   echo done queued_reproduce
 )
+  echo done queued_reproduce_
+REPLAY_DIR=$ROOT_OUTDIR/toreplay
+echo doing queued_replays
+echo replays `ls $REPLAY_DIR/*KEYCODEpure`
+for f in `ls $REPLAY_DIR/*KEYCODEpure`
+do
+	do_queued_replay
+done
+echo done queued_replays
+jobs
+
 }
 
 interesting_crash () {
+echo interesting_crash $GDB , $KEYCODE , =  "$WANT_CRASH_ID" = `get_crash_id`
 (grep " signal SIG[^TK]" $GDB || grep KILL_FREEZE $KEYCODE) &&
    ( test -z "$WANT_CRASH_ID" || test "$WANT_CRASH_ID" = `get_crash_id` )
 }
@@ -281,16 +368,24 @@ get_version_info() {
 	$EXE_TO_TEST -version 2>&1 "$1".version
 }
 
+absname () {
+	#Absolute name of path
+        echo "$1" | grep ^/ || ( echo `pwd`/"$1" )
+}
+
+
 do_one_test() {
   GDB=$OUTDIR/$SEC.GDB
   KEYCODE=$OUTDIR/$SEC.KEYCODE
   KEYCODEpure=$OUTDIR/$SEC.KEYCODEpure
-  NEWHOME=~/kt.dir/$SEC.dir
+  NEWHOME=`absname $TMP_DIR/kt.dir/$SEC.$USER.dir`
   mkdirp $NEWHOME
-  NEWHOME=`cd $NEWHOME; pwd`
+  chmod g+w $TMP_DIR/kt.dir
+  mkdir $NEWHOME
+  NEWHOME=`cd $NEWHOME || (echo CANNOT CD TO NEW HOME $NEWHOME 1>&2 ; sleep 9 ; full_exit) ; pwd`
   echo NEWHOME $NEWHOME
   mkdirp "$NEWHOME"
-  cp -rv $DIRNAME0/.lyx "$NEWHOME"/
+  test -z "$DONT_CP_dotLYX" && cp -rv $DIRNAME0/$dotLYX "$NEWHOME"/
   echo killall -9 lyx latex pdflatex
   killall -9 lyx latex pdflatex
   ( sleep 9 &&
@@ -314,9 +409,14 @@ do_one_test() {
      echo `ps a | grep $EXE_TO_TEST | grep -v grep | sed 's/ [a-z].*$//'`
 	echo -- 4
      echo LYX_PID=$LYX_PID
+     echo 15 > /proc/$LYX_PID/oom_adj
      echo XA_PRIMARY | xclip -selection XA_PRIMARY
      echo XA_SECONDARY | xclip -selection XA_SECONDARY
      echo XA_CLIPBOARD | xclip -selection XA_CLIPBOARD
+     sleep 0.1
+     killall xclip
+
+     
 
      echo -- if [ ! -z "$LYX_PID" ]
      if [ ! -z "$LYX_PID" ]
@@ -327,8 +427,16 @@ do_one_test() {
 	while ! wmctrl -r lyx -b add,maximized_vert,maximized_horz
 	do
 		echo trying to maximize lyx
+		if ps -U $USER | grep $WINDOWS_MANAGER
+		then
+			echo at least the windows manager is running
+		else
+			echo restarting windows_manager
+			$WINDOWS_MANAGER &
+		fi
 		sleep 1
 	done
+         echo MAX_DROP is $MAX_DROP
 	 echo BEGIN KEYTEST KEYTEST_OUTFILE="$KEYCODEpure" nice -19 python $DIRNAME0/keytest.py
          KEYTEST_OUTFILE="$KEYCODEpure" nice -19 python $DIRNAME0/keytest.py | tee $KEYCODE
 	 #echo "$!" > $NEWHOME/keytest_py.pid
@@ -354,7 +462,7 @@ do_one_test() {
   #You may want to use the following to simulate SIGFPE
   #(sleep 90 && killall -8 lyx) &
   echo TTL $TAIL_LINES
-  extras_prepare
+  #extras_prepare
   ensure_cannot_print
   run_gdb
 #  (run_gdb) &
@@ -381,10 +489,12 @@ do_one_test() {
   #if (grep " signal SIG[^TK]" $GDB || grep KILL_FREEZE $KEYCODE)
   if interesting_crash
   then
-    extras_save
-    mkdirp $OUTDIR/save && (
-	    ln $OUTDIR/$SEC.* $OUTDIR/save ||
-	    cp $OUTDIR/$SEC.* $OUTDIR/save)
+    #extras_save
+    #mkdirp $OUTDIR/save && (
+	#    ln $OUTDIR/$SEC.* $OUTDIR/save ||
+	#    cp $OUTDIR/$SEC.* $OUTDIR/save)
+    rm $OUTDIR/$LAST_CRASH_SEC.GDB
+    rm $OUTDIR/$LAST_CRASH_SEC.KEYCODE
     LAST_CRASH_SEC=$SEC
     echo $LAST_CRASH_SEC > $OUTDIR/last_crash_sec
     get_version_info $OUTDIR/last_crash_sec.info
@@ -392,12 +502,21 @@ do_one_test() {
     then
     	LAST_EVENT="$SEC"
 	echo Reproducible > $OUTDIR/Reproducible
+	store_result reproducible
     fi
     TAIL_LINES="" 
     if [ -z "$REPLAYFILE" ]
     then
-	echo ATTEMPTING TO REPLAY
-	try_replay
+	store_result initial
+        #The following errors just keep on popping up. No point reproducing them over and over
+	#if egrep '(::Graph::|lyx::frontend::GuiErrorList)' $GDB
+	if egrep '(lyx::frontend::GuiErrorList)' $GDB
+	then
+		echo NOT REPLAYING, as ERROR ALREADY VERY WELL KNOWN
+	else
+		echo ATTEMPTING TO REPLAY
+		try_replay
+	fi
     else
     	export KEYTEST_INFILE=$KEYCODEpure
 	NUM_KEYCODES=`wc -l < $KEYCODEpure`
@@ -413,6 +532,7 @@ do_one_test() {
     then
 		RESULT=1
 		echo RR 1
+		store_result final
 		return 1
     fi
     if [ ! -z "$LAST_CORE" ]
@@ -451,13 +571,15 @@ do_one_test() {
     fi
 
     echo TTL2 $TAIL_LINES
+    #kill_all_children $$
   fi
+  #kill_all_children $$
 }
 
 test_exist () {
 	if [ ! -e "$1" ]
 	then    
-	        echo "$1" does not exist!
+	        echo "$1" does not exist! 1>&2
 		full_exit 1
 	fi
 }
@@ -465,10 +587,39 @@ test_exist () {
 assert () {
 	if ! "$@"
 	then 
-		echo "Assertion '$*' Failed!"
+		echo "Assertion '$*' Failed!" 1>&2
 		full_exit 1
 	fi
 }
+
+do_task () {
+
+if [ ! -e "$2" ]
+then
+	tar -zxf $TASK_FILE.data.tar.gz
+fi
+
+#assert test "$1" = replay
+if test "$1" = replay
+then
+	KEYCODEpure="$2" WANT_CRASH_ID="$3" do_replay
+else
+	echo UNKNOWN TASK TYPE "$1"
+fi
+
+}
+
+do_tasks () {
+echo DOING TASKS
+mkdirp $ROOT_OUTDIR/tasks_done
+for f in $ROOT_OUTDIR/tasks/*.task
+do
+	echo DOING TASK $f
+	TASK_FILE=$f do_task `cat $f` && mv $ROOT_OUTDIR/tasks/$f $ROOT_OUTDIR/tasks_done/$f
+	echo DONE TASK $f
+done
+}
+
 	
 
 
@@ -478,48 +629,85 @@ assert () {
 
 #Start basic sanity checks
 
-autolyx_main () {
+sanity_checks () {
 
-if [ ! -e "$EXE_TO_TEST" ]
-then
-	echo "$EXE_TO_TEST" does not exist
+ mkdirp "$TMP_DIR" 
+
+ if [ ! -e "$EXE_TO_TEST" ]
+ then
+	echo EXE_TO_TEST "$EXE_TO_TEST" does not exist C
 	echo Cannot proceed
-	exit
-fi
+	exit 1
+ fi
 
-assert which xvkbd
-assert which wmctrl
+ TMPFS_USED=`df tmpfs/ | grep -o ...% | sed s/[^[:digit:]]//g`
+ if [ "$TMPFS_USED" -gt 95 ]
+ then
+	echo "More than 95% ($TMPFS_USED%) of tmpfs/ is used"
+	echo "Not much point starting... will abort"
+	exit 1
+ fi
 
-if ! wmctrl -l > /dev/null 
-then
-	echo autolyx: cannot run wmctrl -l
-	exit
-fi
+ assert which xvkbd
+ assert which wmctrl
 
-test_exist "$EXE_TO_TEST"
-test_exist "$DIRNAME0/keytest.py"
+ test_exist "$EXE_TO_TEST"
+ test_exist "$DIRNAME0/keytest.py"
 
-if ! test -z "`pylint -e $DIRNAME0/keytest.py`" 
-then
+ ensure_cannot_print
+ check_relatime
+ check_can_write "$ROOT_OUTDIR"
+ mkdirp "$TMP_DIR"/kt_dir
+ check_can_write "$TMP_DIR"
+ check_can_write "$TMP_DIR"/kt_dir
+
+ if ! test -z "`pylint -e $DIRNAME0/keytest.py`" 
+ then
 	echo  "$DIRNAME0/keytest.py" has python errors
 	exit
+ fi
+}
+
+autolyx_main () {
+mkdirp "$TMP_DIR"
+if ! wmctrl -l > /dev/null 
+then
+	echo DISPLAY!
+	echo autolyx: cannot run wmctrl -l
+	echo DISPLAY!
+	echo DISPLAY=$DISPLAY
+	exit
 fi
-
-ensure_cannot_print
-
-#End basic sanity checks
 
 if [ ! -z "$1" ]
 then
 	REPLAYFILE=$1
+	echo REPLAYFILE=$1
 fi
+
+sanity_checks
 
 if [ ! -z "$REPLAYFILE" ]
 then
 	echo REPLAYMODE
 	OUTDIR="$REPLAYFILE.replay/"
-	mkdirp $REPLAYFILE.replay/ || full_exit
+	mkdirp $REPLAYFILE.replay/ #|| (echo Cannot make directory $REPLAYFILE.replay/ ; full_exit )
+	if [ ! -d $REPLAYFILE.replay/ ]
+	then
+		echo Cannot make directory $REPLAYFILE.replay/
+		full_exit
+	fi
 	export KEYTEST_INFILE=$REPLAYFILE
+	if [ -e $REPLAYFILE.replay/last_crash_sec -a -z "$AND_THEN_QUIT" ]
+	then
+		KEYTEST_INFILE=$REPLAYFILE.replay/`cat $REPLAYFILE.replay/last_crash_sec`.KEYCODEpure
+		if [ ! -e $KEYTEST_INFILE ]
+		then
+			#if the newer file does not exist, clearly we do not want to use it
+			KEYTEST_INFILE=$REPLAYFILE
+		fi
+		TAIL_LINES=''
+	fi
 	if [ ! -e "$REPLAYFILE" ]
 	then
 		echo "$REPLAYFILE" does not exist
@@ -568,9 +756,11 @@ then
   RESULT="$?"
   echo Ressult $RESULT
 
-  kill `list_all_children.sh $$`
+  kill `$DIRNAME0/list_all_children.sh $$`
+  killall xclip
   sleep 0.1
-  kill -9 `list_all_children.sh $$`
+  kill -9 `$DIRNAME0/list_all_children.sh $$`
+  killall -9 xclip
 
   exit $RESULT
   
@@ -580,17 +770,25 @@ fi
 
 
 
-(
 echo TTL $TAIL_LINES
 
 LAST_EVENT=`date +%s` # Last time something interesting happened. If nothing interesting has happened for a while, we should quit.
+
+rm $LOG_FILE
 
 ensure_cannot_print
 echo X_PID $X_PID
 export X_PID=`get_pid [0-9].x-session-manager"$" x`
 echo PATH $PATH
+
+if [ -z "$REPLAYFILE" ]
+then
+	do_tasks
+fi
+
 while true
 do
+#(
  echo Currently running autolyx PID=$$
  if [ ! -z "$TAIL_LINES" ] 
  then
@@ -600,14 +798,17 @@ do
   KEYTEST_INFILE=$TAIL_FILE
   MAX_DROP=0
  else
-  MAX_DROP=0.2
- fi
+  MAX_DROP=0.05
+ fi #| tee -a $LOG_FILE
  export MAX_DROP
   SEC=`date +%s`
- if [ -z "$TAIL_LINES" -a ! -z "$REPLAYFILE" ] 
+ if [ -z "$TAIL_LINES" ]
  then
-	echo Boredom factor: $SEC-$LAST_EVENT'=' $(($SEC-$LAST_EVENT))
-	if [ $(($SEC-$LAST_EVENT)) -gt $BORED_AFTER_SECS ]
+   if [ ! -z "$REPLAYFILE" ] # We are replaying a KEYCODEpure file
+   then
+	BOREDOM=$(($SEC-$LAST_EVENT))
+	echo Boredom factor: $SEC-$LAST_EVENT'=' BOREDOM=$BOREDOM
+	if [ $BOREDOM -gt $BORED_AFTER_SECS -o -e $OUTDIR/STOP ]
 	then
 		echo
 		echo Is is now $SEC seconds
@@ -618,30 +819,28 @@ do
 		echo $LAST_CRASH_SEC > $OUTDIR/Finished
 		SEC=$LAST_CRASH_SEC #I used SEC in place of LAST_CRASH_SEC. Here is a quick fix.
 		#make screenshots
-		if [ `cat $OUTDIR/$SEC.KEYCODEpure | wc -l` -lt 40 ] # If many keycodes, dont bother trying to make screenshots
+		if [ `wc -l < $OUTDIR/$SEC.KEYCODEpure/` -lt 40 ] # If many keycodes, dont bother trying to make screenshots
 		then
 			echo "Making screenschot of $OUTDIR/$SEC.KEYCODEpure"
 			test -e $OUTDIR/$SEC.KEYCODEpure || echo "DOES NOT EXIST: $OUTDIR/$SEC.KEYCODEpure"
-			(SCREENSHOT_OUT="auto" ./doNtimes.sh 9 ./reproduce.sh $OUTDIR/$SEC.KEYCODEpure ; echo $f )
+			(SCREENSHOT_OUT="auto" ./doNtimes.sh 19 ./reproduce.sh $OUTDIR/$SEC.KEYCODEpure ; echo $f )
+		else
+			echo "Too many keycodes, not making screenshots."
 		fi
-		mkdirp $OUTDIR/final
-		mkdirp $OUTDIR/final_cp
-		#chmod g+w $OUTDIR/final
-		ln $OUTDIR/$SEC* $OUTDIR/final || cp $OUTDIR/$SEC* $OUTDIR/final
-		cp $OUTDIR/$SEC* $OUTDIR/final_cp/
-		cp -rv $OUTDIR/$SEC.replay $OUTDIR/final_cp/
-		CONFIRM_FILE=`calc_confirm_file`
-		echo Reproducible > "$CONFIRM_FILE"
-		
-		
+		store_result final
 		full_exit
 	fi
- else
+   else
+	BOREDOM=NA
 	do_queued_replays
- fi
+   fi
+ fi | tee -a $LOG_FILE
  do_one_test
+if [ `stat -c %b $LOG_FILE` -gt 1000 ] # if logfile > 1000 blocks in size
+then
+	mv $LOG_FILE $LOG_FILE.old 
+fi
 done
 kill_all_children $$
-) 2>&1 |tee $OUTDIR/log
 kill_all_children $$
 }

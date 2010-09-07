@@ -1,0 +1,250 @@
+#!/bin/bash
+# This contains all the information relating to the format of the html bug reports.
+# It has been split from report_html.sh so that when report_html.sh is updated,
+# we know that we do not need to update the html bug reports, unless this file has
+# also been modified 
+
+GEOM=320x200
+QUALITY=85
+
+OUT_SUFFIX=html_out/$OUT_NAME/html
+OUT=$LT/$OUT_SUFFIX
+URL_OF_OUT=http://gmatht.homelinux.net/xp/keytest/$OUT_SUFFIX/
+
+CPP_HTML_DIR_REL=cpp_html
+CPP_HTML_DIR=$OUT/cpp_html
+
+LYX_VER=`$EXE_TO_TEST -version 2>&1 | head -n1 | sed s/^LyX\ // | sed s/\ .*// | sed s/1svn/0/ | sed s/2svn/1/ | sed s/3svn/2/ | sed s/4svn/3/ | sed s/5svn/4/ | sed s/6svn/5/ | sed s/7svn/6/ | sed s/8svn/7/ | sed s/9svn/8/`
+BOILER_PLATE=`cd $SRC_DIR ; svn info 2>&1 | grep Revision`
+
+tidy_keycode () {
+#sed 's/\\/\\\\/g' | 
+while read -r k
+do
+	if [ "$k" = Raiselyx ] 
+	then
+		echo -n '\[!Raiselyx]'
+	elif  [ "$k" = Loop ] 
+	then
+		echo -n '\[!Loop]'
+	else
+		printf '%s' "$k" | sed 's/^KK: //'
+	fi
+done
+}
+
+html_keycode() {
+	  cat "$f_base.KEYCODEpure" | tidy_keycode 
+	  echo -n '<font color=gray>'
+	  cat "$f_base.KEYCODEpure+" | tidy_keycode 
+	  echo -n '</font>'
+
+}
+
+
+trac_keycode() {
+	  echo -n "'''"
+	  cat "$f_base.KEYCODEpure" | tidy_keycode 
+	  echo -n "'''"
+	  #echo -n '""'
+	  #echo -n '<font color=gray>'
+	  cat "$f_base.KEYCODEpure+" | tidy_keycode 
+	  #echo -n '</font>'
+
+}
+
+line2url() {
+	printf '%s' "$*" | sed 's/&/%26/g' | sed 's/"/%22/g' | sed 's/#/%23/g' | sed 's/;/%3B/g' #| sed 's/\\//g'
+}
+
+text2url() {
+	#echo "$@" | 
+	###sed 's/\\/\\\\/g' | sed 's/%/\\%/g' | 
+	while read -r L
+	do
+		###echo -n FFF `echo "$L" | line2url`'%0A' 1>&2
+		###printf '%s' `line2url "$L"`'%0A'
+		###printf '%s' "L2U"`line2url "$L"`'%0A' 1>&2
+		line2url "$L"
+		echo -n "%0A"
+	done
+}
+
+report_bug_url () {
+	#http://www.lyx.org/trac/newticket?description=bar%0Abar2&summary=foo%13oo&keywords=crash&version=1.6.5
+ 	#http://www.lyx.org/trac/newticket?summary=foo%13oo&description=bar%0Abar2&version=1.6.5&keywords=crash
+	#ver=`echo $3 | sed s/1svn/0/ | sed s/2svn/1/ | sed s/3svn/2/ | sed s/4svn/3/ | sed s/5svn/4/ | sed s/6svn/5/ | sed s/7svn/6/ | sed s/8svn/7/ | sed s/9svn/8/`
+	#echo 'http://www.lyx.org/trac/newticket?summary='`line2url "$1"`'&description='`text2url "$2"`'&version='"$LYX_VER"'&keywords=crash'
+	DESC=`get_description | text2url`
+	#DESC=`text2url "$DESC"`
+	if echo $DESC | grep SIGSEGV > /dev/null
+	then
+		KEYWORDSTR="&keywords=crash"
+	else
+		if echo $DESC | grep SIGABRT > /dev/null
+		then
+			KEYWORDSTR="&keywords=assertion"
+		elif echo $DESC | grep SIGSEGV > /dev/null
+		then
+			KEYWORDSTR="crash"
+		fi
+	fi
+	printf '%s' 'http://www.lyx.org/trac/newticket?summary='`line2url "$TITLE"`"&description=$DESC&version=$LYX_VER$KEYWORDSTR"
+	#echo 'http://www.lyx.org/trac/newticket?description='"$1"'&summary=foo%13oo&keywords=crash&version=1.6.
+}
+
+search_bug_url () {
+	#http://www.lyx.org/trac/search?q=Foo%20bar
+	echo 'http://www.lyx.org/trac/search?q='`line2url "$TITLE"`
+}
+
+gdb2html() {
+echo g $g'<br/>'
+#cat $g
+(head $g -n 100 | sed 's/&/\&amp;/g' | sed 's/</\&lt;/g' | sed 's/  /\&nbsp /g'; echo --------; $EXE_TO_TEST -version  2>&1)  | while read -r l
+do
+	#We may want to support slashes later, but we'd have to support browsing
+	#Qt source for that to be useful for LyX
+ 
+	c=`echo "$l" | grep -i -o "at [[:alnum:].]*:[0-9]*"` || true
+	if [ -z "$c" ]
+	then
+		echo -- "$l" | sed s/--//
+	else
+		cpp=`echo "$c" | sed 's/at //' | sed 's/:.*//g'`
+		#cpp=`basename $cpp`
+		echo cpp $cpp
+		lineno=`echo "$c" | sed 's/.*://g'`
+		echo $cpp,$lineno 1>&2
+		if [ -e "$CPP_HTML_DIR/$cpp.html" ]
+		#if true
+		then
+			#echo "$l" | sed "s/$c/<a href=$CPP_HTML_DIR_REL\/$cpp.html\#line$lineno>$c<\/a>/"
+			echo "$l" | sed "s?$c?<a href=$CPP_HTML_DIR_REL\/$cpp.html\#line$lineno>$c<\/a>?"
+		else
+			echo "$l"
+		fi
+	fi
+done | sed 's/^/<br\/>/'
+}
+
+get_description() {
+	echo "Keycodes: "
+	trac_keycode
+	ii=1
+	echo
+	echo To reproduce:
+	cat "$f_base.KEYCODEpure" "$f_base.KEYCODEpure+" | while read -r L
+	do
+		printf '%s' "$ii) ... ($L)
+" 
+		ii=$((ii+1))
+	done
+
+	echo
+	echo Arch: `arch`
+	svn_revision $f_base
+	echo
+	echo '{{{'
+	cat $g | head -n 50 # If we do not limit length we may get "too long url" errors.
+	echo '}}}'
+	echo
+	echo For more info see the "[[$URL_OF_OUT/$HTML_NAME Keytest Report]]"
+}
+
+svn_revision() {
+#| grep ^Revision | sed s/'Revision: '/r/
+echo KEYCODE $1 ... `dirname $1` 1>&2
+#cat `dirname $1`/last_crash_sec.info.svn | grep ^Revision
+cat $f_base.info.svn | grep ^Revision
+echo _KEYCODE $KEYCODE ... 1>&2
+}
+
+make_one_bug_page () {
+	( echo '<html>'
+	  echo "<title>$TITLE</title>"
+	  html_keycode
+	  echo "<br/><a href=$SEC.KEYCODE>KEYCODES</a> "
+	  echo " <a href=$SEC.KEYCODEpure>pure</a> "
+	  echo "<a href=$SEC.GDB>GDB</a>"
+ 	  if ls $f_base.s*.png > /dev/null
+          then
+                 echo "<a href=\"$SEC.screenshot.html\">screenshots</a>" 
+	  else
+		 echo '(no screenshots)'
+ 	  fi
+	  echo "<br/>"
+         
+        #echo -n '<br/> '
+
+	  #echo "<a href=$SEC.GDB.png><img src=$SEC.small.png/></a><br/><br/>"
+	  #echo "<a href=$SEC.screenshot.html><img src=$SEC.small.png/></a><br/><br/>"
+	  gdb2html
+	) > $OUT/$SEC.html
+	( echo ----
+	  svn_revision $f_base
+	  echo arch `arch`
+	  dpkg -l | egrep '(libqt4-dbg|libc6 |libboost-dev )'
+	  lsb_release -a) | sed 's/&/\&amp;/g' | sed 's/</\&lt;/g' | sed 's/  /\&nbsp /g' | sed 's/^/<br\/>/' >> $OUT/$SEC.html
+
+}
+
+make_one_bug () {
+  echo f_base $f_base
+  f=$f_base.GDB
+  echo $f
+  g=$f.short
+  #egrep '([Ii][Nn] .*[:[:alnum:]][:][0-9]*[^0-9]|#0 | signal SIG[^T]| ASSERTION .* VIOLATED IN )' -A9999  <$f >$g
+  (egrep '([Ii][Nn] .*[:[:alnum:]][:][0-9]*[^0-9]|#0 | signal SIG[^T]| ASSERTION .* VIOLATED IN |:error:)' -A9999 | grep -v '^(gdb) (gdb)' | grep -v 'will be killed' | grep -v '^Quit anyway')  <$f >$g
+  if true
+  then
+	IN_AT=`egrep -o '([Ii][Nn]|at) ([:lower:]* )?[:_[:alnum:]]*(::[:_[:alnum:]]*|:[0-9]*)' <$f | grep -v lyx_exit | grep -v [Aa]ssert | head -n 1  `
+	SIGNAL=`grep -o ' signal SIG[[:alnum:]_]*[, ]' <$g | sed s/[^[:upper:]]//g | head -n 1`
+	TITLE="$SIGNAL $IN_AT"
+	if grep ' ASSERTION .* VIOLATED IN ' $g
+	then
+		TITLE=`grep -o ' ASSERTION .* VIOLATED IN .*$' $g`
+	elif grep :error: $g
+	then
+		#TITLE="error `grep :error: $g | head -n1`"
+		TITLE="error at `grep -o lyx::[:[:alnum:]]* $g | head -n1`"
+	fi
+	TITLE_=`echo $TITLE|sed s/[^[:alnum:]]/_/g`
+	INDEX="index.html"
+	HTML_NAME=$SEC.html # name of html report for this bug
+	echo TITLE $TITLE
+	###echo INDEX $INDEX
+	echo NEW $INDEX
+	###echo '<html>' >> $LT/$OUT_NAME/$INDEX
+	(echo -n "<br/><a href=\"$SEC.html\">$TITLE</a> " 
+	html_keycode 
+	#echo -n " [<a href=\"`search_bug_url`\">search</a>] [<a href=\"`report_bug_url`\">report</a>] <a href=\"$SEC.screenshot.html\">screenshots</a>" 
+	echo -n " [<a href=\"`search_bug_url`\">search</a>] [<a href=\"`report_bug_url`\">report</a>]" 
+	if ls $f_base.s*.png > /dev/null
+	then
+		echo -n " <a href=\"$SEC.screenshot.html\">screenshots</a>" 
+	fi
+	echo 
+	#echo -n '<br/> '
+	#echo ) >> $OUT/indexreport.html
+	echo ) > $INDEX_FILE
+	###echo -n '<br> '>> $LT/$OUT_NAME/$INDEX
+	###echo >> $LT/$OUT_NAME/$INDEX
+
+	make_one_bug_page
+
+	###echo '<a href="'"$SEC.html"'">'$SEC'</a><br/>' >> $OUT/$INDEX
+	echo '<a href="'"$SEC.html"'">'$SEC'</a><br/>'
+	#if [ ! -e $OUT/$SEC.small.png ]
+	#then  
+	#	convert -normalize -scale $GEOM $f.png $OUT/$SEC.small.png -quality 85
+	#fi
+	chmod a+r $f $f.png $f_base.KEYCODE* $f_base.html $OUT/indexreport.html || true
+	ln $f $f.png $f_base.KEYCODE* $f_base.html $f_base.s*.png  $OUT/ || true
+	if ls $f_base.s*.png 
+	then
+		$LT/make_screenshot_html.py $OUT $SEC > $OUT/$SEC.screenshot.html
+	fi
+  fi
+}
+

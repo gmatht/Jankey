@@ -1,5 +1,18 @@
 #!/bin/bash
 DIRNAME0=`dirname "$0"`
+echo Loading shared variables...
 . $DIRNAME0/shared_variables.sh
+echo Loading shared functions...
 . $DIRNAME0/shared_functions.sh
+echo done
+
+mkdir -p $TMP_DIR
+if stat -c %U $TMP_DIR | grep ^$USER
+then
+	echo correct user for $TMP_DIR
+else
+	echo tmpfs $TMP_DIR is owned by `stat -c %U $TMP_DIR` not $USER. Aborting. 
+	exit
+fi 
+echo autolyx_main "$@"
 autolyx_main "$@"

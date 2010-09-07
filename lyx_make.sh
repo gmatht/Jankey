@@ -16,7 +16,7 @@ then
 
  if [ a"$1" == a--update ]; then
   svn up
-  ./autogen.sh && ./configure --enable-debug -- && nice -18 make && 
+  ./autogen.sh && PATH=/usr/lib/ccache/:$PATH ./configure --enable-debug --enable-stdlib-debug -- && PATH=/usr/lib/ccache/:$PATH nice -18 make && 
 	if [ ! a"$2" == a"0"  ]
 	then
 		bash $LT/autolyx 

@@ -4,4 +4,6 @@
 #
 # This command is useful if you run keytest under a seperate user "keytest" of group "keytest" 
 . ./shared_variables.sh
-find  $ROOT_OUTDIR | while read f ; do chmod g+rw $f ; chgrp keytest $f ;done
+mkdir -p $ROOT_OUTDIR
+find  $ROOT_OUTDIR tmpfs | egrep -v  '(pure|GDB|gz)$' | while read f ; do chmod g+rw $f ; chgrp keytest $f ;done
+find  $ROOT_OUTDIR | egrep '(pure|GDB|gz)$' | while read f ; do chmod 644 $f ; chgrp keytest $f ;done

@@ -1,7 +1,13 @@
 . ./shared_variables.sh
 OUT=$ROOT_OUTDIR
-for f in `ls $OUT/*/final/*pure`
+for g in "$@"
 do
+if echo "$g" | grep -s '^file://'
+then
+	f=`echo "$g" | sed s,^file://,,`
+else
+	f="$g"
+fi
 echo file_ $f
 if [ ! -e $f.replay ]
 then

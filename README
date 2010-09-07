@@ -28,16 +28,124 @@ keytest.py: Sends randomly generated keypresses to the LyX window.
 killtest: stop the testing
 stock_text: The stock test to add to each bug report.
 watch_keytest.sh: Dumps various info on what keytest is doing, often run as "watch watch_keytest.sh"
+	Watching the output of this is almost as much fun as playing "ProgressQuest"	
+cache-bisect.sh: A script for determining when a regression occurs. 
+        It uses large amount of disk space to cache previously compiled versions of LyX to speed up the bisect.
+
 
 OUTPUTS:
 
 autolyx: Outputs out/*.GDB, a log of all output, including backtraces.
 keytest.py: Outputs out/*.KEYCODES, a list of all keycodes sent to LyX
 
+BISECTING:
+cache-bisect.sh is roughly equivalent to "git bisect run" but takes care of
+building LyX and of keeping cached pre-compiled versions of LyX around. 
+
+Cache-bisect.sh can take as input a .sh file or a .KEYCODEpure file.
+It can convert file URIs into filenames, so you can paste the "pure" link
+generated from ./report_html.sh into a terminal. This means the standard way
+to run cache-bisect.sh is something like:
+  cache-bisect.sh file:///mnt/big/keytest/html_out/out/t6/html/1275784335.html
+
+The .sh file is similar to a script used by git bisect, but it can assume that
+there is a precompiled LyX binary at 
+    EXE=`pwd`_bin/bin/lyx
+
+When cache-bisect.sh is running you can see how much progress it has made by
+running
+  tail -f /tmp/cache-bisect.*.log
+
+For example, if you run 
+  ./cache-bisect.sh examples/CopyColumn.KEYCODEpure
+then after a few hours the line:
+  Relevant Versions ['33494', '33495']
+should appear in a file 
+  /tmp/cache-bisect.*.log
+The first "Relevant Version" is the one we know is good and the last is the
+one we know is bad, so here the regression is in r33495. If there are 
+more than two Relevant Versions then the ones in the middle are ones that
+could have introduced the regression, but we don't know (usually because
+we could not build the Versions in question).
+
+If you want to test the ability to use a script in place of a KEYCODEpure
+file, try running
+  ./cache-bisect.sh examples/AssertOnMerge.sh
+In this case it should report r32772 as the regression
+
+Sometimes a problem doesn't occur 100% of the
+time, perhaps just because LyX loses some keypresses and the script isn't
+clever enought to send them again. In any case we may want to reproduce the
+problem a number of times before we mark a particular version as being "Good".
+To do this, replace the 0001 in cache-bisect.sh with the desired number of times.
+
+If a bisect is interrupted, you may want to manually set the GOOD/BAD versions.
+
+You can do this with something like:
+   (VERS="32548 32538" ./cache-bisect.sh file:///mnt/big/keytest/html_out/out/t6/html/1276005507.KEYCODEpure)
+Note that the higher version comes first.
+
 TIPS:
-To reduce the degree to which keytest writes to your HDD, you may want to run 
-   mount -t tmpfs -o size=50m tmpfs /home/keytest/kt.dir
-as root
+
+keytest can generate a lot of IO, that can make the forground task slow, even though keytest is running at nice level 19. Using noatime, ext4 instead of ext3, compcache/ramzswap and rebooting regularly may (or may not) help.
+
+
+cache-bisect.sh can be useful to find which exact regression caused a bug. However it can be quite difficult to compile old LyX svn trunk versions.
+
+E.g to compile r27418 on ubuntu 9.10, I needed to do the following
+ ln /usr/lib/libboost_filesystem{-mt,}.so
+ ln /usr/lib/libboost_regex{-mt,}.so
+ ln /usr/lib/libboost_signals{-mt,}.so
+ ln /usr/lib/libboost_iostreams{-mt,}.so
+
+nd needed to apply the patch r27418.patch, to compile with gcc-4.4 but it is probably better to just compile the old versions with gcc-4.2
+
+You are likely to have to install automake1.10. Also you will have to install the old autoconf 2.63. I found installing the autoconf2.63 from Jaunty onto Karmic helped. I then added the following three lines to /etc/apt/preferences so ti wouldn't keep trying to upgrade autoconf to 2.64:
+
+Package: autoconf
+Pin: version 2.63*
+Pin-Priority:  1001
+
+
+
+I have set cache-bisect to use gcc 4.2 as older versions of boost have trouble with gcc 4.4
+
+To complile versions earlier than about r27000, you will need even older versions. I installed autoconf 2.60 in /usr/local/bin and added the following symlinks to my path.
+aclocal -> /usr/bin/aclocal-1.9
+autoconf -> /usr/local/bin/autoconf
+autoheader -> /usr/local/bin/autoheader
+autom4te -> /usr/local/bin/autom4te
+automake -> /usr/bin/automake-1.9
+autoreconf -> /usr/local/bin/autoreconf
+autoscan -> /usr/local/bin/autoscan
+autoupdate -> /usr/local/bin/autoupdate
+cc1obj -> /usr/lib/gcc/x86_64-linux-gnu/4.4/cc1obj
+ifnames -> /home/xp/src/autoconf-2.60/bin/ifnames
+Makefile -> /home/xp/src/autoconf-2.60/bin/Makefile
+
+
+
+I use a command like:
+nice -18 ./cache-bisect.py /mnt/big/xp/images/share/Ubuntu904/keytest/doNtimes.sh 9 sudo -H -u keytest2 nice -18 /mnt/big/xp/images/share/Ubuntu904/keytest/set_LYX_DIR_16x /mnt/big/xp/images/share/Ubuntu904/keytest/reproduce.sh `pwd`/tmpfs/0000002.KEYCODEpure
+(DISPLAY=:3 nice -18 ./cache-bisect.py /mnt/big/xp/images/share/Ubuntu904/keytest/doNtimes.sh 9 sudo -H -u keytest2 nice -18 /mnt/big/xp/images/share/Ubuntu904/keytest/set_LYX_DIR_16x /mnt/big/xp/images/share/Ubuntu904/keytest/reproduce.sh `pwd`/tmpfs/0000002.KEYCODEpure) 2>&1 | tee tmpfs/bisect2.log
+(sudo -H -u keytest2 ./kt ; MUST_MATCH="::Graph::" DISPLAY=:3 nice -18 ./cache-bisect.py sudo -H -u keytest2 /mnt/big/xp/images/share/Ubuntu904/keytest/doNtimes.sh 19 /mnt/big/xp/images/share/Ubuntu904/keytest/set_LYX_DIR_16x /mnt/big/xp/images/share/Ubuntu904/keytest/reproduce.sh `pwd`/out/PreviewPS.KEYCODEpure) 2>&1 | tee tmpfs/bisect2.log
+(sudo -H -u keytest2 ./kt ; DISPLAY=:3 xwininfo -root || ./initXvfb 3 ; DISPLAY=:3 nice -18 ./cache-bisect.py sudo -H -u keytest2 /mnt/big/xp/images/share/Ubuntu904/keytest/doNtimes.sh 19 /mnt/big/xp/images/share/Ubuntu904/keytest/set_LYX_DIR_16x /mnt/big/xp/images/share/Ubuntu904/keytest/reproduce.sh `pwd`/out/PreviewPS.KEYCODEpure "::Graph::") 2>&1 | tee tmpfs/bisect2.log
+
+( sudo -H -u keytest2 ./kt; DISPLAY=:3 xwininfo -root || ./initXvfb 3; DISPLAY=:3 nice -19 ./cache-bisect.py sudo -H -u keytest2 /mnt/big/xp/images/share/Ubuntu904/keytest/doNtimes.sh 19 /mnt/big/xp/images/share/Ubuntu904/keytest/set_LYX_DIR_16x /mnt/big/xp/images/share/Ubuntu904/keytest/reproduce.sh `pwd`/out/PreviewPS.KEYCODEpure "::Graph::" ) 2>&1 | tee tmpfs/bisect2.log
+( sudo -H -u keytest2 ./kt; DISPLAY=:3 xwininfo -root || ./initXvfb 3; DISPLAY=:3 nice -19 ./cache-bisect.py sudo -H -u keytest2 /mnt/big/xp/images/share/Ubuntu904/keytest/doNtimes.sh 19 /mnt/big/xp/images/share/Ubuntu904/keytest/set_LYX_DIR_16x /mnt/big/xp/images/share/Ubuntu904/keytest/reproduce.sh `pwd`/out/CtrlW.KEYCODEpure "ASSERTION bv VIOLATED IN LyXFunc.cpp" ) 2>&1 | tee tmpfs/bisect3.log
+ASSERTION bv VIOLATED IN LyXFunc.cpp
+
+
+ERRORS:
+Q: Why do I get errors like the following?
+config/dbus] couldn't take over org.x.config: org.freedesktop.DBus.Error.AccessDenied (Connection ":1.153" is not allowed to own the service "org.x.config.display5" due to security policies in the configuration file)
+(EE) config/hal: NewInputDeviceRequest failed (2)
+(EE) config/hal: NewInputDeviceRequest failed (2)
+(EE) config/hal: NewInputDeviceRequest failed (2)
+(EE) config/hal: NewInputDeviceRequest failed (2)
+(EE) config/hal: NewInputDeviceRequest failed (2)
+
+A: because you haven't listed the X-server in /etc/dbus-1/system.d/xorg-server.conf
 
 AUTHOR:
 Copyright (C) 2009 John McCabe-Dansted, gmatht at gmail dot com.

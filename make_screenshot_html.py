@@ -53,7 +53,7 @@ def Highlight_Keycode_i(keycodes, i):
 
 print '<html>'
 print '<title>Keytest Screenshots</title>'
-for i in range(1, largest_screenshot_number + 1):
+for i in range(1, min ( largest_screenshot_number + 1, len(keycodes))):
 #for (i,k) in enumerate(keycodes)[1:]:
     k = keycodes[i]
     print '<a name='+str(i)+'></a>',

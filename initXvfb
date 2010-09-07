@@ -1,3 +1,7 @@
+#!/bin/bash
+
+echo starting initXfb
+
 if [ -z "$1" ]
 then
 	d=1
@@ -5,22 +9,60 @@ else
 	d=$1
 fi
 
+. ./shared_variables.sh
+
 #Xvfb :1 -screen 1 800x600x24 -fbdir /tmp &
 #Xvfb :1 -screen 1 800x600x24 -pixdepths "1 8 16 24 32"  &
 #Xvfb :$d -ac -screen 0 800x600x24 -wr
 echo 1
+# Xvfb :$d -ac -screen 0 800x600x24 -wr &
 Xvfb :$d -ac -screen 0 800x600x24 -wr &
 
 echo 2
+echo export DISPLAY=:$d
 export DISPLAY=:$d
+sleep 1
+echo will wait for XSERVER to start
+while ! xwininfo -root 
+do
+	echo waiting for xserver to start 
+	sleep 1
+done
+sleep 5
+xhost +localhost
 echo 3
-icewm&
+
+#To get nice screenshots we need metacity it seems, but metacity seems to need dbus to work properly and dbus get confused easily:
+#   "what more than two xservers? NO!!!!! (dbus runs round in abject terror)."
+
+#icewm&
+#fluxbox&
+metacity --sm-disable --replace &
+#$WINDOWS_MANAGER --sm-disable --replace &
+#fluxbox&
+
+echo will wait for WINDOW MANAGER to start
+while ! wmctrl -l
+do
+	echo waiting for window manager to start 
+	sleep 1
+done
+#xclock &
+
 echo 4
 #metacity&
-echo 5
-while true
-do
-	sleep 300 
-	icewm &
-done &
+
+if ! ( ps gaux | grep "sleep 300" )
+then 
+	for i in {1..30}
+	do
+		sleep 300 
+		icewm &
+	done &
+fi
+
 echo 6
+shift
+echo DISPLAY=:$d "$@"
+wmctrl -l || (echo HUH! && sleep 9)
+"$@"

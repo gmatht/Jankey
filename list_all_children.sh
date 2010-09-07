@@ -13,9 +13,9 @@ done
 }
 
 kill_all_children () {
-	kill `listall "$*"`
+	kill `listall "$*" | sed "s/\b$$\b//"`
 	sleep 0.1
-	kill -9 `listall "$*"`
+	kill -9 `listall "$*" | sed "s/\b$$\b//"`
 }
 
 if [ "$1" = "kill"  ]

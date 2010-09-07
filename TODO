@@ -1,24 +1,55 @@
 Short Term
 
-Fix gdb PID bug, use readlink -f lyx/src/lyx
 Make WANT_CRASH_ID optional
 Force all Titles to start with lyx::
 Start moving out lyx specific stuff
 Make variables customisable
+Support LessFS
+do not mark as "Reproducable" unless KEYCODEpure is short enough to report to user
+Debug problem with "./cache-bisect.sh examples 1276005507.KEYCODEpure" when ./.lyx directory exists
+
+in cache_bisect.py, 
+  - do make install, make clean rather than leave in src dir
+  - Tar up old source dirs
+  - compile in a tmpfs
+  - deduplicate installed files
 
 Longer Term
 
-Move all temporary files to a single dir which can be mounted as a tmpfs to reduce HDD writes 
-HTML out with links.
-Try to get KEYCODES to be repeatible and useable (DONE)
-semi protect home dir for repeatibility.
 Support mouse clicks.
-Do not spend hours reproducing a bug that has already been reproduced. (DONE)
 Support other failure modes (e.g. freezes and Python tracebacks)
 Tally of failures vs successes
 If come across different bug when trying to reproduce another, reproduce *both* bugs
 Add report as to how easy bug is to reproduce
 Try e.g. electric fence
 Automatically update from svn every 24 hours, recheck if bugs have been fixed.
-Make it easy to use Xvfb instead of VM. (Done)
 Automatically add bisect to bug report.
+Add a GUI
+Try eliminating each keycode in turn.
+  Try removing alt, shift and ctrl modifiers from key presses.
+Do performance regression testing
+fuzz test inputs and outputs as well.
+use ulimit -u to protect against fork bombs.
+
+Integrate SIKULI: http://groups.csail.mit.edu/uid/sikuli/
+
+DONE:
+
+semi protect home dir for repeatibility.
+HTML out with links.
+Move all temporary files to a single dir which can be mounted as a tmpfs to reduce HDD writes 
+Fix gdb PID bug, use readlink -f lyx/src/lyx
+Try to get KEYCODES to be repeatible and useable (DONE)
+Do not spend hours reproducing a bug that has already been reproduced. (DONE)
+Make it easy to use Xvfb instead of VM. (Done)
+
+Store state so can continue replay after restart
+
+Adaptive keypress removal
+
+We could speed up the rate at which keycodes are discarded by using an adaptive algorithm. E.g.
+if the "splice" techinque was last succesful three attempts ago and the "independant" tecnique
+was successful 9 attempts ago, we could have a 3:1 chance of picking the splice technique.
+
+A similar method could be used to choose between discarding a small number of keycodes vs a
+large number of keycodes.
