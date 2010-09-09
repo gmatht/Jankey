@@ -68,8 +68,29 @@ fi
 
 set | egrep  '^(CRASH|KEYCODEpure|GDB|TEST_COMMAND)='
 
+test_run () {
+	A=/tmp/.out.$USER.1
+	B=/tmp/.out.$USER.2
+	if ! ("$@" > $A 2> $B)
+	then
+		echo FAILED: "$*"
+		echo --- stdout ---
+		cat $A
+		echo --- stderr ---
+		cat $B
+		exit 1
+	fi
+}
+
 DISPLAY=:$D xhost +localhost || true
-( sudo -H -u $BISECT_AS_USER ./kt || true ; DISPLAY=:$D xwininfo -root || sudo -H -u $BISECT_AS_USER ./initXvfb $D; DISPLAY=:$D LYX_NO_BACKTRACE_HELPER="y" ./cache-bisect.py sudo -H -u $BISECT_AS_USER $KT/doNtimes.sh 0003 $KT/set_LYX_DIR_16x $TEST_COMMAND ) 2>&1 | tee $KEYCODEpure.full_bisect_log
+#( sudo -H -u $BISECT_AS_USER ./kt > /dev/null 2> /dev/null || true ; DISPLAY=:$D xwininfo -root > /dev/null 2> /dev/null || sudo -H -u $BISECT_AS_USER ./initXvfb $D > /dev/null 2>/dev/null ; DISPLAY=:$D LYX_NO_BACKTRACE_HELPER="y" ./cache-bisect.py sudo -H -u $BISECT_AS_USER $KT/doNtimes.sh 0013 $KT/set_LYX_DIR_16x $TEST_COMMAND ) 2>&1 | tee $KEYCODEpure.full_bisect_log
+
+(
+sudo -H -u "$BISECT_AS_USER" ./kt > /dev/null 2> /dev/null || true
+DISPLAY=:$D xwininfo -root > /dev/null 2> /dev/null ||
+	test_run sudo -H -u "$BISECT_AS_USER" ./initXvfb $D
+DISPLAY=:$D LYX_NO_BACKTRACE_HELPER="y" ./cache-bisect.py sudo -H -u "$BISECT_AS_USER" "$KT/doNtimes.sh" 0002 "$KT/set_LYX_DIR_16x" $TEST_COMMAND	
+) #2>&1 | tee $KEYCODEpure.full_bisect_log
 
 mkdir -p out/cache-bisect/store
 cp /tmp/cache-bisect.xp.log  out/cache-bisect/store/`basename "$1"`

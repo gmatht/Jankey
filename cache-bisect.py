@@ -10,6 +10,8 @@ import time
 import string
 import shutil
 
+print "Starting cache-bisect.py"
+
 
 outfilename = "/tmp/cache-bisect." + getpass.getuser() + ".log"
 outfile = open(outfilename, 'w')
@@ -26,9 +28,11 @@ else:
 	cache_dir = source_dir + '.cache/'  # must end in a slash
 	source_dir = '/mnt/sdb7/xp/src/svn2/lyx-1.6.x'
 
+store_dir = cache_dir + 'store/'
+
 os.system('mkdir -p ' + cache_dir)
 
-for p in [cache_dir, cache_dir + '/store', source_dir]:
+for p in [cache_dir, cache_dir, store_dir, source_dir]:
 	if not os.path.exists(p):
 		print 'Path', p, 'does not exist, exiting'
 		os._exit(1)
@@ -41,7 +45,8 @@ for p in [cache_dir, cache_dir + '/store', source_dir]:
 
 #make_cmd= 'mkdir -p `pwd`.path ; rm `pwd`.path/a*  ; rm -r autom4te.cache ; rm aclocal.m4 ; ln -s /usr/bin/automake-`cat autogen.sh  | grep "LyX only supports automake" | grep -o "1.[0-9]*" |tail -n1` `pwd`.path/automake &&ln -s /usr/bin/aclocal-`cat autogen.sh  | grep "LyX only supports automake" | grep -o "1.[0-9]*" |tail -n1` `pwd`.path/aclocal && ln -s /usr/bin/autoconf `pwd`.path/autoconf &&   export PATH=`pwd`.path:$PATH && (make distclean || make clean)  ./autogen.sh &&   ./configure --without-included-boost --enable-debug --prefix=`pwd`_bin && make && make install && make install'  #&& make clean'
 #make_cmd='mkdir -p `pwd`.path ; rm `pwd`.path/a* ; make distclean ; make clean ; rm -r autom4te.cache ; rm aclocal.m4 ; ln -s /usr/bin/automake-`cat autogen.sh  | grep "LyX only supports automake" | grep -o "1.[0-9]*" |tail -n1` `pwd`.path/automake &&ln -s /usr/bin/aclocal-`cat autogen.sh  | grep "LyX only supports automake" | grep -o "1.[0-9]*" |tail -n1` `pwd`.path/aclocal && ln -s /usr/bin/autoconf `pwd`.path/autoconf &&   export PATH=`pwd`.path:$PATH && ./autogen.sh && CXX=g++-4.2 CC=gcc-4.2 CXXFLAGS=-Os CFLAGS=-Os ./configure --enable-debug --prefix=`pwd`_bin && make && make install'  #&& make clean'
-make_cmd='(make distclean ; make clean ; rm -r autom4te.cache ; rm aclocal.m4 ;  export PATH=/var/cache/keytest/lyx-devel.cache/26000.path:$PATH && sed -i.bak s/0-[34]/0-5/ ./autogen.sh && ./autogen.sh && CXX=g++-4.2 CC=gcc-4.2 CXXFLAGS=-Os CFLAGS=-Os ./configure --enable-debug --prefix=`pwd`_bin && nice -19 make -j2 && nice -19 make install) | tee MAKE.LOG'  #&& make clean'
+#make_cmd='(make distclean ; make clean ; rm -r autom4te.cache ; rm aclocal.m4 ;  export PATH=/var/cache/keytest/lyx-devel.cache/26000.path:$PATH && sed -i.bak s/0-[34]/0-5/ ./autogen.sh && ./autogen.sh && CXX=g++-4.2 CC=gcc-4.2 CXXFLAGS=-Os CFLAGS=-Os ./configure --enable-debug --prefix=`pwd`_bin && nice -19 make -j2 && nice -19 make install) | tee MAKE.LOG'  #&& make clean'
+make_cmd='(make distclean ; make clean ; rm -r autom4te.cache ; rm aclocal.m4 ;  export PATH=/mnt/big/keytest/path/bin:$PATH && sed -i.bak s/0-[34]/0-5/ ./autogen.sh && ./autogen.sh && CXX=g++-4.2 CC=gcc-4.2 CXXFLAGS=-Os CFLAGS=-Os ./configure --enable-debug --prefix=`pwd`_bin && nice -19 make -j2 && nice -19 make install) | tee MAKE.LOG'  #&& make clean'
 
 reverse_search = True
 reverse_search = False
@@ -117,6 +122,9 @@ def ver_stored(v):
     print "ver2store: ", ver2store(v)
     return os.path.exists(ver2store(v))
 
+def check_has_VC(v):
+    check_call(['svn', 'info'], cwd=ver2dir(v))
+
 
 def is_built(d):
     '''Returns true if the source directory d has successfully built it's binaries'''
@@ -143,7 +151,7 @@ def make_ver(new_v, old_v=None, alt_v=None):
         print >> outfile, "Failed make: see",cache_dir + fail_d
         return 1
     if is_built(new_d):
-        print >> outfile, "make already done, see"+new_d+"_bin/share/lyx/chkconfig.ltx"
+        print >> outfile, "make already done, see "+new_d+"_bin/share/lyx/chkconfig.ltx"
         return 0
     if not ( os.path.exists(tmp_d) or os.path.exists(new_d) ):
         if not os.path.exists(old_d):
@@ -156,9 +164,14 @@ def make_ver(new_v, old_v=None, alt_v=None):
 	if ver_stored(old_v):
 		#This could leave partial copies around, I should really use a tmpdir
 		#os.system("cd " + cache_dir + " && tar -zxf " + ver2store(old_v))
-		check_call(['tar', '-zxf', ver2store(old_v)], cwd=cache_dir)
+		tmp_dir = cache_dir + '/tmp'
+		tmp_d = tmp_dir + '/' + old_v
+		check_call(['mkdir', '-p', 'tmp'], cwd=cache_dir)
+		check_call(['tar', '-zxf', store_dir + '/' + old_v + '.tar.gz' ], cwd=tmp_dir)
 		#print "CMD: cd " + cache_dir + " && tar -zxf " + ver2store(old_v)
-		check_call(['mv', ver2dir(old_v), new_d])
+		check_call(['mv', tmp_d, new_d])
+		check_has_VC(new_v)
+		set_revision(new_v, new_d)
 		print "Untarred and moved"
 	else:
 	        call(['cp', '-ru', old_d, tmp_d + '.cp'])
@@ -169,6 +182,7 @@ def make_ver(new_v, old_v=None, alt_v=None):
         check_call(['mv', tmp_d, new_d])
     print >> outfile, "Make DIR: ",new_d
     print "Make DIR: ",new_d
+    check_has_VC(new_v)
     result = call(make_cmd, cwd=new_d, shell=True)
     if result == 0:
         print 'Make successful'
