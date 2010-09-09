@@ -93,6 +93,7 @@ def killall_p (s):
     # command name
 
         #os.system("kPID=`ps a | grep '"+s+"' | grep -v grep | sed 's/^ *//g'|  sed 's/ .*$//'`
+    print "killall_p " + s+ " activated"
     os.system("(kPID=`ps a | grep '"+s+
     "' | grep -v grep | sed 's/^ *//g'|  sed 's/ .*$//'`\n\
         echo kPID $kPID "+s+"\n\
@@ -103,6 +104,7 @@ def killall_p (s):
         kill -9 $kPID) 2> /dev/null")
 
 def clean_up ():
+    print "CLEAN UP (killer) activated"
     killall_p("autolyx")
     killall_p("keytest.py")
     killall_p("xclip")
@@ -248,7 +250,10 @@ def run_cmd(cmd, v):
     #result = subprocess.call(cmd, shell=True, cwd=ver2dir(v))
     os.system('mkdir "'+ver2dir(v)+'"')
     result = call(cmd, cwd=ver2dir(v))
-    clean_up()
+    # Uncommenting the following line will cause the "tar -zxf" process to be killed
+    # AFAICT this *should* is impossible because clean_up shouldn't even run at the
+    # same time, but I'll leave it comment out until I find out what the problem is.
+    ####clean_up()
     print cmd, result
     return result
 
