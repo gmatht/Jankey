@@ -1,0 +1,118 @@
+#! /bin/sh
+
+### BEGIN INIT INFO
+# Provides:             keytest
+# Required-Start:       $remote_fs $syslog
+# Required-Stop:        $remote_fs $syslog
+# Default-Start:        2 3 4 5
+# Default-Stop:         1
+# Short-Description:    Keytest random key press generator and crash logger.
+### END INIT INFO
+
+D=8 #DISPLAY
+
+set -e
+
+. /lib/lsb/init-functions
+
+KT=/mnt/big/keytest
+TMPFS=$KT/tmpfs
+
+export TMPDIR=$TMPFS
+
+if [ -e ./etc/keytest/rc ]
+then
+	. ./etc/keytest/rc
+fi
+if [ -e ./etc/keytest/dir ]
+then
+	KT=`cat ./etc/keytest/dir`
+fi
+
+rm $KT/tmpfs/nohup.log || true
+
+mkdir -p $TMPFS
+chown keytest $TMPFS
+chmod g+wx $TMPFS
+
+stop () {
+	echo stop
+	sudo -H -u keytest killall Xvfb || true
+	sleep 1
+	sudo -H -u keytest killall -9 Xvfb || true
+	sleep 1
+	sudo -H -u keytest $KT/killtest.sh || true
+	#(cd /mnt/big/xp/images/share/Ubuntu904/keytest &&
+	(cd /mnt/big/keytest &&
+
+		sudo -H -u keytest ./store_task_data.sh 
+	)
+	kill `ps gaux | grep "^keytest " | awk '{print $2}'` || true
+	sleep 2
+	kill -9 `ps gaux | grep "^keytest " | awk '{print $2}'` || true
+}
+
+start () {
+  echo start
+ # We now set TMPDIR, so hopefully we do not create /tmp/.X11-unix/
+ while false #[ ! -e /tmp/.X11-unix/ ]
+ do
+	# We don't want keytest to take ownership of /tmp/.X11-unix/
+	# Ubuntu 9.10 finds this suspcious and refuses to launch
+	# Main X server
+	echo waiting for /tmp/.X11-unix/ to be created
+	sleep 3
+ done
+ if ! mount | grep $TMPFS
+ then
+
+	echo mount tmpfs $TMPFS tmpfs -o size=400m
+	mount tmpfs $TMPFS -t tmpfs -o size=400m
+ fi
+
+ (cd /mnt/big/keytest
+  OUT_NAME=`grep ^OUT_NAME= shared_variables.sh | sed s/^OUT_NAME=//`
+  (find $OUT_NAME; find tmpfs/) | while read F
+  do
+	chgrp keytest "$F"
+	chmod g+w "$F"
+  done 
+  mkdir -p "$OUT_NAME"
+  chgrp keytest "$OUT_NAME"
+  chmod g+w "$OUT_NAME"
+  echo PWD `pwd`
+  sudo -H -u keytest ./sanity_check.sh > /dev/null && (
+  #sudo -H -u keytest nice -19 nohup bash ./initXvfb 1 bash ./main.sh >> /dev/null & 
+	echo STARTING
+  	sudo -H -u keytest nice -19 ionice -c 3 nohup bash ./initXvfb 8 bash ./main.sh > tmpfs/nohup.log &
+ )
+
+  #sudo -H -u keytest nice -19 ionice -c 3 nohup bash ./initXvfb 1 bash ./main.sh >> tmpfs/nohup.log &
+ )
+}
+
+case "$1" in
+  start)
+	#log_daemon_msg "Starting Keytest" "keytest"
+	stop #should maybe just do nothing if already started but definitly do not want two running
+	start
+	;;
+  stop)
+	#log_daemon_msg "Stopping Keytest" "keytest"
+	stop
+	;;
+
+  reload|force-reload|restart|try-restart)
+	stop
+	start
+	;;
+
+  #status)
+
+  *)
+	#log_action_msg "Usage: $0 {start|stop|reload|force-reload|restart|try-restart|status}"
+	log_action_msg "Usage: $0 {start|stop|reload|force-reload|restart|try-restart}"
+	exit 1
+esac
+
+exit 0

@@ -89,7 +89,7 @@ DISPLAY=:$D xhost +localhost || true
 sudo -H -u "$BISECT_AS_USER" ./kt > /dev/null 2> /dev/null || true
 DISPLAY=:$D xwininfo -root > /dev/null 2> /dev/null ||
 	test_run sudo -H -u "$BISECT_AS_USER" ./initXvfb $D
-DISPLAY=:$D LYX_NO_BACKTRACE_HELPER="y" ./cache-bisect.py sudo -H -u "$BISECT_AS_USER" "$KT/doNtimes.sh" 0002 "$KT/set_LYX_DIR_16x" $TEST_COMMAND	
+DISPLAY=:$D LYX_NO_BACKTRACE_HELPER="y" ./cache-bisect.py sudo -H -u "$BISECT_AS_USER" "$KT/doNtimes.sh" 0032 "$KT/set_LYX_DIR_16x" $TEST_COMMAND	
 ) #2>&1 | tee $KEYCODEpure.full_bisect_log
 
 mkdir -p out/cache-bisect/store
