@@ -97,10 +97,7 @@ sort -k 2 -t '>' < $OUT/indexreport.html ) >> $OUT/index.html
 echo built index.html
 
 #firefox $OUT/indexreport.html
-if [ -z "$DISPLAY" ]
-then
-	echo $URL_OF_OUT/indexreport.html
-	#w3m $OUT/index.html
-else
+echo $URL_OF_OUT/indexreport.html
+if [ ! -z "$DISPLAY" ]
 	google-chrome $OUT/index.html && wmctrl -R '- Google Chrome'
 fi
