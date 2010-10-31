@@ -85,6 +85,7 @@ class CommandSource:
         for k in ascii_keys:
             keycode[:0] = ["\C" + chr(k)]
 
+        keycode[:0] = ["\Atp\D5\t\D5i\D5\[Down]\D5s\D5\Ap\D5\As"]
         # We probably don't need shift because we can just use the ascii code for the uppercase characters.
         #for k in ascii_keys:
         #    keycode[:0] = ["\S" + chr(k)]
