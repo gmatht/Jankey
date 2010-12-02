@@ -141,6 +141,18 @@ get_description() {
 		ii=$((ii+1))
 	done
 
+	if [ -e out/cache-bisect/store/$SEC.KEYCODEpure ]
+	then
+		echo
+		echo
+		echo -n 'Regression in:' 
+		grep "Relevant Versions" out/cache-bisect/store/$SEC.KEYCODEpure | grep -o ". '[0-9]*'" | sed 's/[^0-9]//g' | while read r
+		do
+			echo -n r"$r "
+		done
+	fi 
+
+
 	echo
 	echo Arch: `arch`
 	svn_revision $f_base
@@ -224,6 +236,15 @@ make_one_bug () {
 	then
 		echo -n " <a href=\"$SEC.screenshot.html\">screenshots</a>" 
 	fi
+	if [ -e out/cache-bisect/store/$SEC.KEYCODEpure ]
+	then
+		echo ' [Regression in:'
+		grep "Relevant Versions" out/cache-bisect/store/$SEC.KEYCODEpure | grep -o ". '[0-9]*'" | sed 's/[^0-9]//g' | while read r
+		do
+			echo "<a href=\"http://www.lyx.org/trac/changeset/$r\">$r</a> "
+		done
+		echo ']'
+	fi 
 	echo 
 	#echo -n '<br/> '
 	#echo ) >> $OUT/indexreport.html

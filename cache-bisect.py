@@ -1,5 +1,6 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
+# Should also log date
 
 import sys 
 import os
@@ -46,7 +47,7 @@ for p in [cache_dir, cache_dir, store_dir, source_dir]:
 #make_cmd= 'mkdir -p `pwd`.path ; rm `pwd`.path/a*  ; rm -r autom4te.cache ; rm aclocal.m4 ; ln -s /usr/bin/automake-`cat autogen.sh  | grep "LyX only supports automake" | grep -o "1.[0-9]*" |tail -n1` `pwd`.path/automake &&ln -s /usr/bin/aclocal-`cat autogen.sh  | grep "LyX only supports automake" | grep -o "1.[0-9]*" |tail -n1` `pwd`.path/aclocal && ln -s /usr/bin/autoconf `pwd`.path/autoconf &&   export PATH=`pwd`.path:$PATH && (make distclean || make clean)  ./autogen.sh &&   ./configure --without-included-boost --enable-debug --prefix=`pwd`_bin && make && make install && make install'  #&& make clean'
 #make_cmd='mkdir -p `pwd`.path ; rm `pwd`.path/a* ; make distclean ; make clean ; rm -r autom4te.cache ; rm aclocal.m4 ; ln -s /usr/bin/automake-`cat autogen.sh  | grep "LyX only supports automake" | grep -o "1.[0-9]*" |tail -n1` `pwd`.path/automake &&ln -s /usr/bin/aclocal-`cat autogen.sh  | grep "LyX only supports automake" | grep -o "1.[0-9]*" |tail -n1` `pwd`.path/aclocal && ln -s /usr/bin/autoconf `pwd`.path/autoconf &&   export PATH=`pwd`.path:$PATH && ./autogen.sh && CXX=g++-4.2 CC=gcc-4.2 CXXFLAGS=-Os CFLAGS=-Os ./configure --enable-debug --prefix=`pwd`_bin && make && make install'  #&& make clean'
 #make_cmd='(make distclean ; make clean ; rm -r autom4te.cache ; rm aclocal.m4 ;  export PATH=/var/cache/keytest/lyx-devel.cache/26000.path:$PATH && sed -i.bak s/0-[34]/0-5/ ./autogen.sh && ./autogen.sh && CXX=g++-4.2 CC=gcc-4.2 CXXFLAGS=-Os CFLAGS=-Os ./configure --enable-debug --prefix=`pwd`_bin && nice -19 make -j2 && nice -19 make install) | tee MAKE.LOG'  #&& make clean'
-make_cmd='(make distclean ; make clean ; rm -r autom4te.cache ; rm aclocal.m4 ;  export PATH=/mnt/big/keytest/path/bin:$PATH && sed -i.bak s/0-[34]/0-5/ ./autogen.sh && ./autogen.sh && CXX=g++-4.2 CC=gcc-4.2 CXXFLAGS=-Os CFLAGS=-Os ./configure --enable-debug --prefix=`pwd`_bin && nice -19 make -j2 && nice -19 make install) | tee MAKE.LOG'  #&& make clean'
+make_cmd='(make distclean ; make clean ; rm -r autom4te.cache ; rm aclocal.m4 ;  export PATH=/usr/lib/ccache/:/mnt/big/keytest/path/bin:$PATH && sed -i.bak s/0-[34]/0-5/ ./autogen.sh && ./autogen.sh && CXX=g++-4.2 CC=gcc-4.2 CXXFLAGS=-Os CFLAGS=-Os ./configure --enable-debug --prefix=`pwd`_bin && nice -19 make -j2 && nice -19 make install) | tee MAKE.LOG'  #&& make clean'
 
 reverse_search = True
 reverse_search = False
@@ -248,7 +249,7 @@ def run_cmd(cmd, v):
     print "CMD", cmd
     print "V2D", ver2dir(v)
     #result = subprocess.call(cmd, shell=True, cwd=ver2dir(v))
-    os.system('mkdir "'+ver2dir(v)+'"')
+    os.system('mkdir -p "'+ver2dir(v)+'"')
     result = call(cmd, cwd=ver2dir(v))
     # Uncommenting the following line will cause the "tar -zxf" process to be killed
     # AFAICT this *should* is impossible because clean_up shouldn't even run at the
@@ -513,11 +514,12 @@ newest_ver = VERS[0]
 #newest_ver='33263'
 
 print VERS
+print >> outfile, cmd
 print >> outfile, VERS 
 print newest_ver
 time.sleep(1)
 make_ver(newest_ver)
-if run_cmd(cmd, newest_ver) == 0:
+if run_cmd(cmd, newest_ver) == 0 and os.environ.get('VERS') is None:
     print 'Could not reproduce on directory:', newest_ver, '\n'
     logline ('Could not reproduce on directory:' + newest_ver + '\n')
     #check_call("./cache-add-dir.sh");

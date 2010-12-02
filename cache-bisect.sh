@@ -4,8 +4,12 @@ pylint -e ./cache-bisect.py
 
 # This script does a binary bisection on a KEYCODEpure file
 
-D=3
+# If you want to avoid the complexity of this script. do something like:
+#  ./cache-bisect.py `pwd`/set_LYX_DIR_16x `pwd`/reproduce.sh `pwd`/examples/SplitScreenModify.KEYCODEpure
+
+D=7
 BISECT_AS_USER=keytest2
+#BISECT_AS_USER=xp
 
 #Uncomment the following if you want to bisect to run as you with the primary X-server.
 #D=0
@@ -29,7 +33,8 @@ echo PWD $PWD
 
 BISECT_TMP_DIR="$KT/tmpfs/cache-bisect.$USER"
 mkdir -p $BISECT_TMP_DIR
-chgrp keytest $BISECT_TMP_DIR
+chgrp keytest $BISECT_TMP_DIR 
+echo DONE
 chmod g+rwx $BISECT_TMP_DIR
 
 if echo "$TEST_FILE" | grep '.KEYCODEpure$'
@@ -56,8 +61,8 @@ then
 	echo TEST_FILE "$TEST_FILE"
 	echo "$TEST_FILE"* "$KT/tmpfs/cache-bisect/"
 	cp "$TEST_FILE"* "$KT/tmpfs/cache-bisect/"
-	chgrp keytest $KT/tmpfs/cache-bisect/*sh.lyx
-	chmod g+w $KT/tmpfs/cache-bisect/*sh.lyx
+	chgrp keytest $KT/tmpfs/cache-bisect/*sh.lyx || true
+	chmod g+w $KT/tmpfs/cache-bisect/*sh.lyx || true
 	
 	TEST_COMMAND="$KT/tmpfs/cache-bisect/`basename $TEST_FILE`"
 else
@@ -83,13 +88,13 @@ test_run () {
 }
 
 DISPLAY=:$D xhost +localhost || true
-#( sudo -H -u $BISECT_AS_USER ./kt > /dev/null 2> /dev/null || true ; DISPLAY=:$D xwininfo -root > /dev/null 2> /dev/null || sudo -H -u $BISECT_AS_USER ./initXvfb $D > /dev/null 2>/dev/null ; DISPLAY=:$D LYX_NO_BACKTRACE_HELPER="y" ./cache-bisect.py sudo -H -u $BISECT_AS_USER $KT/doNtimes.sh 0013 $KT/set_LYX_DIR_16x $TEST_COMMAND ) 2>&1 | tee $KEYCODEpure.full_bisect_log
+#( sudo -H -u $BISECT_AS_USER ./kt > /dev/null 2> /dev/null || true ; DISPLAY=:$D xwininfo -root > /dev/null 2> /dev/null || sudo -H -u $BISECT_AS_USER ./initXvfb $D > /dev/null 2>/dev/null ; DISPLAY=:$D LYX_NO_BACKTRACE_HELPER="y" ./cache-bisect.py sudo -H -u $BISECT_AS_USER $KT/doNtimes.sh 001 $KT/set_LYX_DIR_16x $TEST_COMMAND ) 2>&1 | tee $KEYCODEpure.full_bisect_log
 
 (
 sudo -H -u "$BISECT_AS_USER" ./kt > /dev/null 2> /dev/null || true
 DISPLAY=:$D xwininfo -root > /dev/null 2> /dev/null ||
 	test_run sudo -H -u "$BISECT_AS_USER" ./initXvfb $D
-DISPLAY=:$D LYX_NO_BACKTRACE_HELPER="y" ./cache-bisect.py sudo -H -u "$BISECT_AS_USER" "$KT/doNtimes.sh" 0032 "$KT/set_LYX_DIR_16x" $TEST_COMMAND	
+DISPLAY=:$D LYX_NO_BACKTRACE_HELPER="y" ./cache-bisect.py sudo -H -u "$BISECT_AS_USER" "$KT/doNtimes.sh" 0003 "$KT/set_LYX_DIR_16x" $TEST_COMMAND	
 ) #2>&1 | tee $KEYCODEpure.full_bisect_log
 
 mkdir -p out/cache-bisect/store

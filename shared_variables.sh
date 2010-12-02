@@ -5,7 +5,7 @@ get_tmp_dir () {
 
 DIRNAME0=`dirname "$0"`
 #OUT_NAME=out/branch_16_a/
-OUT_NAME=out/t8/
+OUT_NAME=out/t10/
 #TMP_DIR=tmpfs/tmp-$USER/$OUT_NAME
 TMP_DIR=`get_tmp_dir $USER $OUT_NAME`
 LOG_FILE=$TMP_DIR/log

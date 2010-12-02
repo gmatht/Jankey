@@ -18,10 +18,12 @@ AND_THEN_QUIT="y" time ./autolyx $KEYCODEpure_FILE
 RESULT=$?
 echo RESULT_REPRODUCE $RESULT
 echo MUST_MATCH="$MUST_MATCH"
+
 if [ $RESULT -gt 0 -a ! -z "$MUST_MATCH" ] 
 then
 	SEC=`cat $KEYCODEpure_FILE.replay/last_crash_sec`
 	GDB_FILE=$KEYCODEpure_FILE.replay/$SEC.GDB
+	cp "$GDB_FILE" /tmp/reproduce.`date +%s`.GDB
 	echo GDB_FILE=$GDB_FILE
 	ls $GDB_FILE 
 	echo egrep "$MUST_MATCH" "$GDB_FILE"

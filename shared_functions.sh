@@ -386,6 +386,9 @@ do_one_test() {
   echo NEWHOME $NEWHOME
   mkdirp "$NEWHOME"
   test -z "$DONT_CP_dotLYX" && cp -rv $DIRNAME0/$dotLYX "$NEWHOME"/
+  #rm -rf "$NEWHOME"/.lyx-
+  #cp -rv ~xp/.lyx- "$NEWHOME"/.lyx-
+  #ls "$NEWHOME"/.lyx- > /tmp/ls_NEW.log
   echo killall -9 lyx latex pdflatex
   killall -9 lyx latex pdflatex
   ( sleep 9 &&

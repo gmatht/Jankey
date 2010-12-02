@@ -79,10 +79,10 @@ do
  echo f_base $f_base
  NUM_KEYCODES=`wc -l < "$f_base.KEYCODEpure"`
  echo NUM_KEYCODES=$NUM_KEYCODES...
- if [ "$NUM_KEYCODES" -lt 20 ]  
+ if [ "$NUM_KEYCODES" -lt 50 ]  
  then
   INDEX_FILE=$OUT/indexreport.d/$SEC.html
-  if [ \( ! -e $OUT/$SEC.html \) -o \( "$0".format -nt $OUT/$SEC.html \) ]
+  if [ \( ! -e $OUT/$SEC.html \) -o \( "$0".format -nt $OUT/$SEC.html \) -o \( out/cache-bisect/store/$SEC.KEYCODEpure -nt $OUT/$SEC.html \) ]
   then
 	make_one_bug
   fi
@@ -93,11 +93,13 @@ echo will build index.html
 (echo "<html>" 
 echo "<h1>List of bugs found</h1>"
 echo '<p>Please, do not "report" bugs without searching for them first. Also make sure to fill out the "To reproduce" section before pressing the "Create ticket" button</p>' 
-sort -k 2 -t '>' < $OUT/indexreport.html ) >> $OUT/index.html
+cat < $OUT/indexreport.html ) >> $OUT/index.html
+#sort -k 2 -t '>' < $OUT/indexreport.html ) >> $OUT/index.html
 echo built index.html
 
 #firefox $OUT/indexreport.html
 echo $URL_OF_OUT/indexreport.html
 if [ ! -z "$DISPLAY" ]
+then
 	google-chrome $OUT/index.html && wmctrl -R '- Google Chrome'
 fi
