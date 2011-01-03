@@ -13,6 +13,7 @@ import time
 #from subprocess import call
 import subprocess
 import resource
+import array
 from math import sqrt
 
 # Maximum about of resident LyX memory before we kill it.
@@ -58,6 +59,7 @@ class CommandSource:
             '\[BackSpace]',
             '\[Delete]',
             '\[Escape]',
+            '\[Return]',
             ]
 
         keycode[:0] = keycode
@@ -144,6 +146,18 @@ def pick_drop_prob(fname):
 
 class CommandSourceFromFile(CommandSource):
 
+#    def hasalt(self):
+#	a = False
+# 	for l in self.lines:
+#		if l.find("\A") > -1:
+#			a = True
+
+#    def index_of_Alt(self):
+#	a = array.array('l') 
+#	for idx, l in enumerate(self.lines):
+#		if l.find("\A") > -1:
+#			a.append(idx)
+
     def __init__(self, filename, p):
 
 	if os.path.exists(filename+"M"):
@@ -160,8 +174,32 @@ class CommandSourceFromFile(CommandSource):
         self.count = 0
         self.loops = 0
 
+#	if random.uniform(0, 1) < 0.2:
+#		if (
+#		string.replace(str, old)
+
         # Now we start randomly dropping lines, which we hope are redundant
         # p is the probability that any given line will be removed
+	if random.uniform(0, 1) < 0.05:
+		if random.uniform(0, 1) < 0.5:
+			to_remove="\S"
+		else:	
+			to_remove="\A"
+		a = array.array('l')
+	        for idx, l in enumerate(self.lines):
+                	if l.find(to_remove) > -1:
+                        	a.append(idx)
+
+		print "ioA ", a
+
+	        #ioA =  index_of_Alt();
+		if len(a) > 0:
+			r1 = random.randint(0,len(a)-1)
+			r=a[r1]
+			self.lines[r]=self.lines[r].replace(to_remove,"")
+			p = 0
+			print "ioAr ", r1, r, to_remove
+	
 
         if p > 0.001:
             if random.uniform(0, 1) < 0.5:

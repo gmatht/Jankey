@@ -54,6 +54,7 @@ stop () {
 
 start () {
   echo start
+  
  # We now set TMPDIR, so hopefully we do not create /tmp/.X11-unix/
  while false #[ ! -e /tmp/.X11-unix/ ]
  do
@@ -84,6 +85,7 @@ start () {
   sudo -H -u keytest ./sanity_check.sh > /dev/null && (
   #sudo -H -u keytest nice -19 nohup bash ./initXvfb 1 bash ./main.sh >> /dev/null & 
 	echo STARTING
+	ps gaux | grep kill_too_much_mem || ( ./kill_too_much_mem.sh & )
   	sudo -H -u keytest nice -19 ionice -c 3 nohup bash ./initXvfb 8 bash ./main.sh > tmpfs/nohup.log &
  )
 

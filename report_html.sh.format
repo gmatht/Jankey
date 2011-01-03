@@ -79,11 +79,11 @@ report_bug_url () {
 	#DESC=`text2url "$DESC"`
 	if echo $DESC | grep SIGSEGV > /dev/null
 	then
-		KEYWORDSTR="&keywords=crash"
+		KEYWORDSTR="&keywords=crash%20keytest"
 	else
 		if echo $DESC | grep SIGABRT > /dev/null
 		then
-			KEYWORDSTR="&keywords=assertion"
+			KEYWORDSTR="&keywords=assertion%20keytest"
 		elif echo $DESC | grep SIGSEGV > /dev/null
 		then
 			KEYWORDSTR="crash"
@@ -242,7 +242,7 @@ make_one_bug () {
 		grep "Relevant Versions" out/cache-bisect/store/$SEC.KEYCODEpure | grep -o ". '[0-9]*'" | sed 's/[^0-9]//g' | while read r
 		do
 			echo "<a href=\"http://www.lyx.org/trac/changeset/$r\">$r</a> "
-		done
+		done | sed 's/ $//g'
 		echo ']'
 	fi 
 	echo 

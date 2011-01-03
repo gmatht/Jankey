@@ -21,8 +21,13 @@ absname () {
 }
 
 TEST_FILE=`echo "$1" | sed s,^file://,,`
-TEST_FILE=`echo "$1" | sed s,^http://.*/keytest/,,`
+#echo $TEST_FILE
+#exit
+TEST_FILE=`echo "$TEST_FILE" | sed s,^http://.*/keytest/,,`
 TEST_FILE=`absname "$TEST_FILE"`
+
+#grep '^-' $VERS -lt 0 ]
+
 
 
 KT=`dirname $0`
@@ -65,6 +70,9 @@ then
 	chmod g+w $KT/tmpfs/cache-bisect/*sh.lyx || true
 	
 	TEST_COMMAND="$KT/tmpfs/cache-bisect/`basename $TEST_FILE`"
+elif echo "$TEST_FILE" | grep '^/bin'
+then
+	TEST_COMMAND=$TEST_FILE
 else
 	echo Type of "$TEST_COMMAND'" not recognized.
 	echo Can only handle KEYCODEpure files and sh files.
@@ -94,7 +102,7 @@ DISPLAY=:$D xhost +localhost || true
 sudo -H -u "$BISECT_AS_USER" ./kt > /dev/null 2> /dev/null || true
 DISPLAY=:$D xwininfo -root > /dev/null 2> /dev/null ||
 	test_run sudo -H -u "$BISECT_AS_USER" ./initXvfb $D
-DISPLAY=:$D LYX_NO_BACKTRACE_HELPER="y" ./cache-bisect.py sudo -H -u "$BISECT_AS_USER" "$KT/doNtimes.sh" 0003 "$KT/set_LYX_DIR_16x" $TEST_COMMAND	
+DISPLAY=:$D LYX_NO_BACKTRACE_HELPER="y" ./cache-bisect.py sudo -H -u "$BISECT_AS_USER" "$KT/doNtimes.sh" 0009 "$KT/set_LYX_DIR_16x" $TEST_COMMAND	
 ) #2>&1 | tee $KEYCODEpure.full_bisect_log
 
 mkdir -p out/cache-bisect/store
