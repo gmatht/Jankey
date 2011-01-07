@@ -33,7 +33,15 @@ def get_max_rss(max_MiB, max_percent):
     max_rss = max_bytes / pagesize 
     print "Max_MiB:", max_MiB, "  pagesize:", pagesize, "  max_rss:", max_rss
     return max_rss
-    
+
+#FIXME: use check_env everywhere to make incorrectly name shared_variables easier to check for.    
+def check_env(key):
+	e=os.environ.get(key)
+	if e is None:
+		print key + "is None!!! Aborting !!!\n" ; sys.stdout.flush()
+		os._exit(1)
+	return (e)
+	
 max_rss = get_max_rss(500,33) 
 
 print 'Beginning keytest.py'
@@ -336,9 +344,11 @@ def sendKeystring(keystr, LYX_PID):
 
 def system_retry(num_retry, cmd):
     i = 0
+    print "KPP02aa " + cmd ; sys.stdout.flush()
     rtn = os.system(cmd)
+    print "KPP02b" ; sys.stdout.flush()
     while ( ( i < num_retry ) and ( rtn != 0) ):
-        sys.stdout.write("_");
+        sys.stdout.write("_\n");
         sys.stdout.flush();
         i = i + 1
 	rtn=os.system(cmd)
@@ -346,6 +356,8 @@ def system_retry(num_retry, cmd):
     if ( rtn != 0 ):
         print "Command Failed: "+cmd
         print " EXITING!\n"
+        print "KPP02iXXXXb" ; sys.stdout.flush()
+        sys.stdout.flush();
         os._exit(1)
 
 def RaiseWindow():
@@ -354,7 +366,9 @@ def RaiseWindow():
     ####os.system("wmctrl -l | ( grep '"+lyx_window_name+"' || ( killall lyx ; sleep 1 ; killall -9 lyx ))")
     #os.system("wmctrl -R '"+lyx_window_name+"' ;sleep 0.1")
     #system_retry(30, "wmctrl -R '"+lyx_window_name+"'")
-    system_retry(30, os.environ.get("RAISE_WINDOW_COMMAND"))
+    print "KPP02a" ; sys.stdout.flush()
+    system_retry(30, check_env("RAISE_WINDOW_CMD"))
+    print "KPP02z" ; sys.stdout.flush()
 
 
 lyx_pid = os.environ.get('LYX_PID')
@@ -393,10 +407,14 @@ else:
     x = CommandSourceFromFile(infilename, probability_we_drop_a_command)
     print 'Using x=CommandSourceFromFile\n'
 
+print "KPP 1" ; sys.stdout.flush()
 outfile = open(outfilename, 'w')
+print "KPP02" ; sys.stdout.flush()
 
 RaiseWindow()
+print "KPP03" ; sys.stdout.flush()
 sendKeystring("\Afn", lyx_pid)
+print "KPP04" ; sys.stdout.flush()
 write_commands = True
 
 while True:
