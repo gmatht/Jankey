@@ -2,6 +2,7 @@
 #LT=development/keystest
 
 set -e
+set -x
 
 LT=`dirname $0`
 . $LT/shared_variables.sh
@@ -93,7 +94,10 @@ echo will build index.html
 (echo "<html>" 
 echo "<h1>List of bugs found</h1>"
 echo '<p>Please, do not "report" bugs without searching for them first. Also make sure to fill out the "To reproduce" section before pressing the "Create ticket" button</p>' 
-sort -k 2 -t '>' < $OUT/indexreport.html ) >> $OUT/index.html
+#FIXME: Sort messes up multiline entries.
+#sort -k 2 -t '>' < $OUT/indexreport.html 
+cat $OUT/indexreport.html 
+) >> $OUT/index.html
 echo built index.html
 
 #firefox $OUT/indexreport.html
