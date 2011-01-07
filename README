@@ -38,6 +38,22 @@ OUTPUTS:
 autolyx: Outputs out/*.GDB, a log of all output, including backtraces.
 keytest.py: Outputs out/*.KEYCODES, a list of all keycodes sent to LyX
 
+DEBUGGING KEYTEST ITSELF:
+You may find the following commands useful:
+
+./Xwatch.sh 8
+	Watch the Virtual Screen keytest is writing to in a webbrowser
+
+watch ./watch_keytest.sh
+	Watch the progress keytest is making and various relevant files
+	This is the most useful if keytest is up and runnign
+
+tail -f tmpfs/nohup.log
+	watch the output log keytest is generating.
+
+
+
+
 BISECTING:
 cache-bisect.sh is roughly equivalent to "git bisect run" but takes care of
 building LyX and of keeping cached pre-compiled versions of LyX around. 
