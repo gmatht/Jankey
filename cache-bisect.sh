@@ -1,10 +1,13 @@
 set -e
 
 pylint -e ./cache-bisect.py
+mkdir -p /var/cache/keytest/lyx-devel.cache/store/
+
+. ./shared_variables.sh
 
 # This script does a binary bisection on a KEYCODEpure file
 
-D=3
+D=7
 BISECT_AS_USER=keytest2
 
 #Uncomment the following if you want to bisect to run as you with the primary X-server.
@@ -84,6 +87,8 @@ test_run () {
 
 DISPLAY=:$D xhost +localhost || true
 #( sudo -H -u $BISECT_AS_USER ./kt > /dev/null 2> /dev/null || true ; DISPLAY=:$D xwininfo -root > /dev/null 2> /dev/null || sudo -H -u $BISECT_AS_USER ./initXvfb $D > /dev/null 2>/dev/null ; DISPLAY=:$D LYX_NO_BACKTRACE_HELPER="y" ./cache-bisect.py sudo -H -u $BISECT_AS_USER $KT/doNtimes.sh 0013 $KT/set_LYX_DIR_16x $TEST_COMMAND ) 2>&1 | tee $KEYCODEpure.full_bisect_log
+
+sudo -H -u "$BISECT_AS_USER" ./initXvfb $D
 
 (
 sudo -H -u "$BISECT_AS_USER" ./kt > /dev/null 2> /dev/null || true
