@@ -370,7 +370,7 @@ jobs
 
 interesting_crash () {
 echo interesting_crash $GDB , $KEYCODE , =  "$WANT_CRASH_ID" = `get_crash_id`
-(grep " signal SIG[^TK]" $GDB || grep KILL_FREEZE $KEYCODE) &&
+(grep " signal SIG[^TK]" $GDB || grep KILL_FREEZE $KEYCODE || grep "Assert [*]" $GDB) &&
    ( test -z "$WANT_CRASH_ID" || test "$WANT_CRASH_ID" = `get_crash_id` )
 }
 
@@ -443,6 +443,7 @@ do_one_test() {
      echo -- if [ ! -z "$LYX_PID" ]
      if [ ! -z "$LYX_PID" ]
      then
+         echo NO LYX_PID $LYX_PID killing keytest.py
 	 kill `ps a | grep keytest.py | grep -v grep | cut -c 1-5`
 	 sleep 0.2
 	 kill -9 `ps a | grep keytest.py | grep -v grep | cut -c 1-5`
