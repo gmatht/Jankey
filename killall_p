@@ -1,0 +1,29 @@
+#!/bin/bash
+get_pid () {
+	sleep 3
+	echo getting pidof "$1" 1>&2
+	PID=`ps a"$2" | grep "$1" | grep -v grep | sed 's/^ *//g'|  sed 's/ .*$//'`
+	echo "$PID" | ( grep " " > /dev/null && ( echo too many PIDs 1>&2 ; full_exit ) )
+	nPIDs=`echo PID "$PID" | wc -l`
+	echo nPIDs $nPIDs 1>&2
+	echo -- if [ "$nPIDs" != "1" ] 1>&2
+	if [ "$nPIDs" != "1" ]
+	then 
+		echo autolyx: Wrong number of PIDs "$nPIDs" 1>&2
+	fi
+	echo "$PID"
+	echo got pidof "$1" 1>&2
+}
+clean_up () {
+  	KT_PID=`get_pid keytest.py x`
+  	kill $KT_PID
+	sleep 0.1
+  	kill -9 $KT_PID
+}
+ps a"$2" | grep "$1" | grep -v grep
+PIDs=`ps a"$2" | grep "$1" | grep -v grep | sed 's/^ *//g'|  sed 's/ .*$//'`
+echo PIDs $PIDs
+kill $PIDs
+sleep 0.1
+kill -9 $PIDs
+#kill -9 `ps a"$2" | grep "$1" | grep -v grep | sed 's/^ *//g'|  sed 's/ .*$//'`
