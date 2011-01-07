@@ -1,4 +1,7 @@
 #!/bin/bash
+
+set -x
+
 DIRNAME0=`dirname "$0"`
 echo Loading shared variables...
 . $DIRNAME0/shared_variables.sh
