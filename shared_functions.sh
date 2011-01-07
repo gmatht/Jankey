@@ -406,7 +406,10 @@ do_one_test() {
   test -z "$DONT_CP_dotLYX" && cp -rv $DIRNAME0/$dotLYX "$NEWHOME"/
   kill_exe
   echo killall -9 latex pdflatex
-  killall -9 latex pdflatex || trueA
+  killall -9 latex pdflatex || true
+  #rm -rf "$NEWHOME"/.lyx-
+  #cp -rv ~xp/.lyx- "$NEWHOME"/.lyx-
+  #ls "$NEWHOME"/.lyx- > /tmp/ls_NEW.log
   ( sleep 9 &&
      ps a | grep $EXE_NAME 
 	echo -- 1 || full_exit
@@ -466,7 +469,7 @@ do_one_test() {
 	 fi
          KEYTEST_OUTFILE="$KEYCODEpure" nice -19 python $DIRNAME0/keytest.py | tee $KEYCODE
 	 #echo "$!" > $NEWHOME/keytest_py.pid
-	 echo END_KEYTEST
+	 echo END_KEYTEST KEYTEST_OUTFILE="$KEYCODEpure" nice -19 python $DIRNAME0/keytest.py ..  tee $KEYCODE
      fi
      echo NO_KEYTEST
      echo killall lyx

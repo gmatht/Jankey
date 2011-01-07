@@ -5,7 +5,7 @@ get_tmp_dir () {
 
 DIRNAME0=`dirname "$0"`
 #OUT_NAME=out/branch_16_a/
-OUT_NAME=out/t8/
+OUT_NAME=out/t10/
 #TMP_DIR=tmpfs/tmp-$USER/$OUT_NAME
 TMP_DIR=`get_tmp_dir $USER $OUT_NAME`
 LOG_FILE=$TMP_DIR/log
@@ -50,4 +50,5 @@ fi
 SRC_ROOT=`pwd`/$SRC_ROOT
 export SRC_ROOT
 export EXE_NAME
-export MAKE_CMD='(export PATH=/mnt/big/keytest/path/bin:$PATH; pwd; sed -i.bak "s/fgets.buf,10,stdin.;/buf[0]=\'y\';/" src/af/util/unix/ut_unixAssert.cpp || true ; ./autogen.sh && ./configure --enable-debug --prefix=`pwd`_bin && nice -19 make -j2 && nice -19 make install) | tee MAKE.LOG'
+export MAKE_CMD='(export PATH=/mnt/big/keytest/path/bin:$PATH; pwd; sed -i.bak "s/fgets.buf,10,stdin.;/buf[0]='\'y\'';/" src/af/util/unix/ut_unixAssert.cpp || true ; ./autogen.sh && ./configure --enable-debug --prefix=`pwd`_bin && nice -19 make -j2 && nice -19 make install) | tee MAKE.LOG'
+

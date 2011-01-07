@@ -1,5 +1,6 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
+# Should also log date
 
 import sys 
 import os
@@ -51,6 +52,7 @@ for p in [cache_dir, cache_dir, store_dir, source_dir]:
 #make_cmd='(make distclean ; make clean ; rm -r autom4te.cache ; rm aclocal.m4 ;  export PATH=/mnt/big/keytest/path/bin:$PATH && sed -i.bak s/0-[34]/0-5/ ./autogen.sh && ./autogen.sh && CXX=g++-4.2 CC=gcc-4.2 CXXFLAGS=-Os CFLAGS=-Os ./configure --enable-debug --prefix=`pwd`_bin && nice -19 make -j2 && nice -19 make install) | tee MAKE.LOG'  #&& make clean'
 make_cmd='(export PATH=/mnt/big/keytest/path/bin:$PATH; pwd; sed -i.bak "s/fgets.buf,10,stdin.;/buf[0]=\'y\';/" src/af/util/unix/ut_unixAssert.cpp || true ; ./autogen.sh && ./configure --enable-debug --prefix=`pwd`_bin && nice -19 make -j2 && nice -19 make install) | tee MAKE.LOG'  #&& make clean'
 #NOTE: add /usr/lib/ccache/
+make_cmd='(make distclean ; make clean ; rm -r autom4te.cache ; rm aclocal.m4 ;  export PATH=/usr/lib/ccache/:/mnt/big/keytest/path/bin:$PATH && sed -i.bak s/0-[34]/0-5/ ./autogen.sh && ./autogen.sh && CXX=g++-4.2 CC=gcc-4.2 CXXFLAGS=-Os CFLAGS=-Os ./configure --enable-debug --prefix=`pwd`_bin && nice -19 make -j2 && nice -19 make install) | tee MAKE.LOG'  #&& make clean'
 make_cmd=os.environ.get('MAKE_CMD'):
 
 reverse_search = True
@@ -538,11 +540,12 @@ newest_ver = VERS[0]
 #newest_ver='33263'
 
 print VERS
+print >> outfile, cmd
 print >> outfile, VERS 
 print newest_ver
 time.sleep(1)
 make_ver(newest_ver)
-if run_cmd(cmd, newest_ver) == 0:
+if run_cmd(cmd, newest_ver) == 0 and os.environ.get('VERS') is None:
     print 'Could not reproduce on directory:', newest_ver, '\n'
     logline ('Could not reproduce on directory:' + newest_ver + '\n')
     #check_call("./cache-add-dir.sh");

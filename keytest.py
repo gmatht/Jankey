@@ -85,6 +85,7 @@ class CommandSource:
         for k in ascii_keys:
             keycode[:0] = ["\C" + chr(k)]
 
+        keycode[:0] = ["\Atp\D5\t\D5i\D5\[Down]\D5s\D5\Ap\D5\As"]
         # We probably don't need shift because we can just use the ascii code for the uppercase characters.
         #for k in ascii_keys:
         #    keycode[:0] = ["\S" + chr(k)]
@@ -300,6 +301,7 @@ def system_retry(num_retry, cmd):
     rtn = os.system(cmd)
     while ( ( i < num_retry ) and ( rtn != 0) ):
         sys.stdout.write("_");
+        sys.stdout.flush();
         i = i + 1
 	rtn=os.system(cmd)
         time.sleep(1)
@@ -313,7 +315,8 @@ def RaiseWindow():
     os.system("echo x-session-manager open files: `lsof -p $X_PID | grep ICE-unix | wc -l`")
     ####os.system("wmctrl -l | ( grep '"+lyx_window_name+"' || ( killall lyx ; sleep 1 ; killall -9 lyx ))")
     #os.system("wmctrl -R '"+lyx_window_name+"' ;sleep 0.1")
-    system_retry(30, "wmctrl -R '"+lyx_window_name+"'")
+    #system_retry(30, "wmctrl -R '"+lyx_window_name+"'")
+    system_retry(30, os.environ.get("RAISE_WINDOW_COMMAND"))
 
 
 lyx_pid = os.environ.get('LYX_PID')
