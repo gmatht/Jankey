@@ -20,15 +20,36 @@ mkdirp () {
 	chmod g+w "$1"
 } 
 
+kill_exe() {
+	killall evince-previewer latex pdflatex
+	killall_children $EXE_NAME
+	killall -9 evince-previewer latex pdflatex
+}
+
+killall_children() {
+	for pid in `ps ux | grep :..\ "$1" | grep -v grep | awk '{print $2}'`
+	do
+		kill $pid
+		kill `$DIRNAME0/list_all_children.sh $pid`
+	done
+	sleep 0.2
+	for pid in `ps ux | grep :..\ "$1" | grep -v grep | awk '{print $2}'`
+	do
+		kill -9 $pid
+		kill -9 `$DIRNAME0/list_all_children.sh $pid`
+	done
+}
+
+kill_all_childrenx() {
+	echo killing $1 all children of PID $1 by $$
+        #echo kill $1 `$DIRNAME0/list_all_children.sh $1` 
+        kill $1 `$DIRNAME0/list_all_children.sh $1`
+}
+	
 kill_all_children() {
-	echo killing all children of PID $1 by $$
-        echo kill `$DIRNAME0/list_all_children.sh $1`
-        kill `$DIRNAME0/list_all_children.sh $1`
-	echo killed
+	kill_all_childrenx '' $1
         sleep 0.1
-	echo killing 9 all children of PID $1
-        echo kill -9 `$DIRNAME0/list_all_children.sh $1`
-        kill -9 `$DIRNAME0/list_all_children.sh $1`
+	kill_all_childrenx '-9' $1
 }
 
 store_result() {
@@ -196,13 +217,10 @@ run_gdb () {
 	full_exit
   fi
   echo DISPLAY $DISPLAY
-  (sleep 300; echo KILLER ACTIVATIED ;killall gdb lyx ; sleep 1 ; killall -9 gdb lyx)&
+  (sleep 300; echo KILLER ACTIVATIED ; kill_exe ; killall gdb ; sleep 0.1 ; killall -9 gdb || true)&
   KILLER_PID=$!
   echo KILLING LYX, before starting new lyx
-  killall lyx
-  sleep 1 
-  killall lyx -9
-  sleep 1
+  kill_exe
   mkdirp $NEWHOME/tmp
   echo Starting GDB
   #shell svn info $SRC_DIR/
@@ -315,10 +333,7 @@ do_queued_replay() {
 		move_to_replayed
 	else
 		#./development/keytest/killtest
-		killall lyx
-		sleep 1
-		echo killall -9 lyx
-		killall -9 lyx
+		kill_exe
 		KEYCODEpure="$f" do_replay
 		#if test_replayed 
 		#then 
@@ -365,7 +380,10 @@ echo interesting_crash $GDB , $KEYCODE , =  "$WANT_CRASH_ID" = `get_crash_id`
 
 get_version_info() {
 	(cd $SRC_DIR ; svn info) 2>&1 |tee "$1".svn
-	$EXE_TO_TEST -version 2>&1 "$1".version
+	### [[Should reenable this for lyx, makes little sense for abiword.
+	#echo GETTING VERSION
+	#$EXE_TO_TEST -version 2>&1 "$1".version || true
+	#echo GOT VERSION
 }
 
 absname () {
@@ -386,13 +404,14 @@ do_one_test() {
   echo NEWHOME $NEWHOME
   mkdirp "$NEWHOME"
   test -z "$DONT_CP_dotLYX" && cp -rv $DIRNAME0/$dotLYX "$NEWHOME"/
+  kill_exe
+  echo killall -9 latex pdflatex
+  killall -9 latex pdflatex || true
   #rm -rf "$NEWHOME"/.lyx-
   #cp -rv ~xp/.lyx- "$NEWHOME"/.lyx-
   #ls "$NEWHOME"/.lyx- > /tmp/ls_NEW.log
-  echo killall -9 lyx latex pdflatex
-  killall -9 lyx latex pdflatex
   ( sleep 9 &&
-     ps a | grep lyx 
+     ps a | grep $EXE_NAME 
 	echo -- 1 || full_exit
      LYX_PID=""
      i=0
@@ -427,7 +446,8 @@ do_one_test() {
 	 kill `ps a | grep keytest.py | grep -v grep | cut -c 1-5`
 	 sleep 0.2
 	 kill -9 `ps a | grep keytest.py | grep -v grep | cut -c 1-5`
-	while ! wmctrl -r lyx -b add,maximized_vert,maximized_horz
+	#while ! wmctrl -r $LYX_WINDOW_NAME -b add,maximized_vert,maximized_horz
+	while ! $RAISE_WINDOW_CMD
 	do
 		echo trying to maximize lyx
 		if ps -U $USER | grep $WINDOWS_MANAGER
@@ -441,16 +461,23 @@ do_one_test() {
 	done
          echo MAX_DROP is $MAX_DROP
 	 echo BEGIN KEYTEST KEYTEST_OUTFILE="$KEYCODEpure" nice -19 python $DIRNAME0/keytest.py
+	 if [ -e $DIRNAME0/keytest.py ]
+	 then
+		echo $DIRNAME0/keytest.py Exists \(`pwd`\)
+	 else
+		echo $DIRNAME0/keytest.py DOES NOT EXIST!!! \(`pwd`\)
+	 fi
          KEYTEST_OUTFILE="$KEYCODEpure" nice -19 python $DIRNAME0/keytest.py | tee $KEYCODE
 	 #echo "$!" > $NEWHOME/keytest_py.pid
-	 echo END_KEYTEST
+	 echo END_KEYTEST KEYTEST_OUTFILE="$KEYCODEpure" nice -19 python $DIRNAME0/keytest.py ..  tee $KEYCODE
      fi
      echo NO_KEYTEST
      echo killall lyx
-     killall lyx
+     kill_all_children $LYX_PID
+     kill_exe
      sleep 0.1
-     kill -9 "$LYX_PID"
-     killall -9 lyx #sometimes LyX really doesn't want to die causing the script to freeze
+     kill -9 "$LYX_PID" || true
+     #killall -9 $EXE_NAME #sometimes LyX really doesn't want to die causing the script to freeze
      #killall lyx #sometimes LyX really doesn't want to die causing the script to freeze
      sleep 1
      #kill -9 "$LYX_PID" #sometimes LyX really doesn't want to die causing the script to freeze
@@ -501,6 +528,7 @@ do_one_test() {
     LAST_CRASH_SEC=$SEC
     echo $LAST_CRASH_SEC > $OUTDIR/last_crash_sec
     get_version_info $OUTDIR/last_crash_sec.info
+    echo GOT VERSION delme
     if [ ! -z "$TAIL_LINES" ]
     then
     	LAST_EVENT="$SEC"
@@ -658,7 +686,8 @@ sanity_checks () {
  test_exist "$DIRNAME0/keytest.py"
 
  ensure_cannot_print
- check_relatime
+ #Recent kernels default to relatime, so check_relatime not really needed.
+ #check_relatime
  check_can_write "$ROOT_OUTDIR"
  mkdirp "$TMP_DIR"/kt_dir
  check_can_write "$TMP_DIR"
@@ -763,7 +792,7 @@ then
   killall xclip
   sleep 0.1
   kill -9 `$DIRNAME0/list_all_children.sh $$`
-  killall -9 xclip
+  killall -9 xclip || true
 
   exit $RESULT
   

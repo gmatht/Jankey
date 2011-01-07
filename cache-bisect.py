@@ -17,22 +17,33 @@ print "Starting cache-bisect.py"
 outfilename = "/tmp/cache-bisect." + getpass.getuser() + ".log"
 outfile = open(outfilename, 'w')
 
-trunk=False
+#trunk=False
 trunk=True
 #source_dir = '/mnt/big/xp/src/lyx-1.6.x-bisect'  # must NOT end in a slash
-if trunk:
-	source_dir = '/var/cache/keytest/lyx-devel'  # must NOT end in a slash
-	cache_dir = source_dir + '.cache/'  # must end in a slash
-	source_dir = '/mnt/modern/xp/src/lyx-devel'
-	source_dir = '/mnt/big/keytest/lyx'
-else:
-	source_dir = '/var/cache/keytest/lyx-1.6.x'  # must NOT end in a slash
-	cache_dir = source_dir + '.cache/'  # must end in a slash
-	source_dir = '/mnt/sdb7/xp/src/svn2/lyx-1.6.x'
+#if trunk:
+#	source_dir = '/var/cache/keytest/lyx-devel'  # must NOT end in a slash
+#	cache_dir = source_dir + '.cache/'  # must end in a slash
+#	source_dir = '/mnt/modern/xp/src/lyx-devel'
+#else:
+#	source_dir = '/var/cache/keytest/lyx-1.6.x'  # must NOT end in a slash
+#	cache_dir = source_dir + '.cache/'  # must end in a slash
+#	source_dir = '/mnt/sdb7/xp/src/svn2/lyx-1.6.x'
+
+source_dir = os.environ.get('SRC_ROOT')
+cache_dir = source_dir + '.cache/'  # must end in a slash
+#if trunk:
+##	source_dir = '/var/cache/keytest/lyx-devel'  # must NOT end in a slash
+#	cache_dir = source_dir + '.cache/'  # must end in a slash
+#	source_dir = '/mnt/modern/xp/src/lyx-devel'
+#	source_dir = '/mnt/big/keytest/lyx'
+#else:
+#	source_dir = '/var/cache/keytest/lyx-1.6.x'  # must NOT end in a slash
+#	cache_dir = source_dir + '.cache/'  # must end in a slash
+#	source_dir = '/mnt/sdb7/xp/src/svn2/lyx-1.6.x'
 
 store_dir = cache_dir + 'store/'
 
-os.system('mkdir -p ' + cache_dir)
+os.system('mkdir -p ' + store_dir)
 
 for p in [cache_dir, cache_dir, store_dir, source_dir]:
 	if not os.path.exists(p):
@@ -47,8 +58,16 @@ for p in [cache_dir, cache_dir, store_dir, source_dir]:
 
 #make_cmd= 'mkdir -p `pwd`.path ; rm `pwd`.path/a*  ; rm -r autom4te.cache ; rm aclocal.m4 ; ln -s /usr/bin/automake-`cat autogen.sh  | grep "LyX only supports automake" | grep -o "1.[0-9]*" |tail -n1` `pwd`.path/automake &&ln -s /usr/bin/aclocal-`cat autogen.sh  | grep "LyX only supports automake" | grep -o "1.[0-9]*" |tail -n1` `pwd`.path/aclocal && ln -s /usr/bin/autoconf `pwd`.path/autoconf &&   export PATH=`pwd`.path:$PATH && (make distclean || make clean)  ./autogen.sh &&   ./configure --without-included-boost --enable-debug --prefix=`pwd`_bin && make && make install && make install'  #&& make clean'
 #make_cmd='mkdir -p `pwd`.path ; rm `pwd`.path/a* ; make distclean ; make clean ; rm -r autom4te.cache ; rm aclocal.m4 ; ln -s /usr/bin/automake-`cat autogen.sh  | grep "LyX only supports automake" | grep -o "1.[0-9]*" |tail -n1` `pwd`.path/automake &&ln -s /usr/bin/aclocal-`cat autogen.sh  | grep "LyX only supports automake" | grep -o "1.[0-9]*" |tail -n1` `pwd`.path/aclocal && ln -s /usr/bin/autoconf `pwd`.path/autoconf &&   export PATH=`pwd`.path:$PATH && ./autogen.sh && CXX=g++-4.2 CC=gcc-4.2 CXXFLAGS=-Os CFLAGS=-Os ./configure --enable-debug --prefix=`pwd`_bin && make && make install'  #&& make clean'
+<<<<<<< HEAD
+#make_cmd='(make distclean ; make clean ; rm -r autom4te.cache ; rm aclocal.m4 ;  export PATH=/var/cache/keytest/lyx-devel.cache/26000.path:$PATH && sed -i.bak s/0-[34]/0-5/ ./autogen.sh && ./autogen.sh && CXX=g++-4.2 CC=gcc-4.2 CXXFLAGS=-Os CFLAGS=-Os ./configure --enable-debug --prefix=`pwd`_bin && nice -19 make -j2 && nice -19 make install) | tee MAKE.LOG'  #&& make clean'
+#make_cmd='(make distclean ; make clean ; rm -r autom4te.cache ; rm aclocal.m4 ;  export PATH=/mnt/big/keytest/path/bin:$PATH && sed -i.bak s/0-[34]/0-5/ ./autogen.sh && ./autogen.sh && CXX=g++-4.2 CC=gcc-4.2 CXXFLAGS=-Os CFLAGS=-Os ./configure --enable-debug --prefix=`pwd`_bin && nice -19 make -j2 && nice -19 make install) | tee MAKE.LOG'  #&& make clean'
+make_cmd='(export PATH=/mnt/big/keytest/path/bin:$PATH; pwd; sed -i.bak "s/fgets.buf,10,stdin.;/buf[0]=\'y\';/" src/af/util/unix/ut_unixAssert.cpp || true ; ./autogen.sh && ./configure --enable-debug --prefix=`pwd`_bin && nice -19 make -j2 && nice -19 make install) | tee MAKE.LOG'  #&& make clean'
+#NOTE: add /usr/lib/ccache/
+make_cmd='(make distclean ; make clean ; rm -r autom4te.cache ; rm aclocal.m4 ;  export PATH=/usr/lib/ccache/:/mnt/big/keytest/path/bin:$PATH && sed -i.bak s/0-[34]/0-5/ ./autogen.sh && ./autogen.sh && CXX=g++-4.2 CC=gcc-4.2 CXXFLAGS=-Os CFLAGS=-Os ./configure --enable-debug --prefix=`pwd`_bin && nice -19 make -j2 && nice -19 make install) | tee MAKE.LOG'  #&& make clean'
+make_cmd=os.environ.get('MAKE_CMD'):
 make_cmd='(make distclean ; make clean ; rm -r autom4te.cache ; rm aclocal.m4 ;  export PATH=/var/cache/keytest/lyx-devel.cache/26000.path:$PATH && sed -i.bak s/0-[34]/0-5/ ./autogen.sh && ./autogen.sh && CXX=g++-4.2 CC=gcc-4.2 CXXFLAGS=-Os CFLAGS=-Os ./configure --enable-debug --prefix=`pwd`_bin && nice -19 make -j2 && nice -19 make install) | tee MAKE.LOG'  #&& make clean'
 make_cmd='(make distclean ; make clean ; rm -r autom4te.cache ; rm aclocal.m4 ;  sed "s/exit 1/#exit 1/g" < autogen.sh > autogen_noexit.sh && chmod +x ./autogen_noexit.sh  ; svn revert -R lib/doc lib/examples po/ && export PATH=/usr/lib/ccache/:/mnt/big/keytest/path/bin:$PATH  &&  sed -i.bak s/0-[34]/0-5/ ./autogen.sh && ./autogen_noexit.sh && CXX=g++-4.2 CC=gcc-4.2 CXXFLAGS=-Os CFLAGS=-Os ./configure --enable-debug --prefix=`pwd`_bin && nice -19 make -j2 && nice -19 make install) | tee MAKE.LOG'  #&& make clean'
+make_cmd=os.environ.get('MAKE_CMD'):
 
 reverse_search = True
 reverse_search = False
@@ -131,6 +150,8 @@ def ver2store(v):
     return cache_dir + 'store/' + v + '.tar.gz'
 
 def ver_stored(v):
+    if v is None:
+	return False
     print "ver2store: ", ver2store(v)
     return os.path.exists(ver2store(v))
 
@@ -138,9 +159,17 @@ def check_has_VC(v):
     check_call(['svn', 'info'], cwd=ver2dir(v))
 
 
+is_built_suffix='_bin'
+if os.environ.get('IS_BUILT_SUFFIX') is not None:
+    is_built_suffix=os.environ.get('IS_BUILT_SUFFIX')
+
 def is_built(d):
     '''Returns true if the source directory d has successfully built it's binaries'''
-    return os.path.exists(d+"_bin/share/lyx/chkconfig.ltx")
+    p=d + is_built_suffix
+    print "p: "+p
+    ib = os.path.exists(p) 
+    print "ib: ", ib
+    return ib 
 
 def make_ver(new_v, old_v=None, alt_v=None):
     print 'MAKING', new_v, old_v, alt_v
@@ -148,11 +177,21 @@ def make_ver(new_v, old_v=None, alt_v=None):
     outfile.flush()
     new_d = ver2dir(new_v)
     if is_built(new_d):
+<<<<<<< HEAD
+        print "Is already built"
+        return 0
+    else:
+	print new_d + "Not built?"
+        #os.system("sleep 9")
+    sys.stdout.flush()
+    #os._exit(1) #TEST
+=======
         print "make already done, see "+new_d+"_bin/share/lyx/chkconfig.ltx"
         print >> outfile, "make already done, see "+new_d+"_bin/share/lyx/chkconfig.ltx"
         return 0
     check_call("! test -L "+new_d, shell=True)
     call(['rmdir', new_d]) # Sometimes empty directories appear (bug or consequence of full filesystem?), they should only appear if the version has been built, so we remove the directory here to remove confusion.
+>>>>>>> a7364a2a4a75cccf9b1a567801c7793e737c5502
     if old_v is None:
         old_d = source_dir
 	print >> outfile, "old_d = source_dir = " , old_d
@@ -179,6 +218,12 @@ def make_ver(new_v, old_v=None, alt_v=None):
     if os.path.exists(cache_dir + fail_d):
         print >> outfile, "Failed make: see",cache_dir + fail_d
         return 1
+<<<<<<< HEAD
+    if is_built(new_d):
+        print >> outfile, "make already done, see " + new_d + is_built_suffix
+        return 0
+=======
+>>>>>>> a7364a2a4a75cccf9b1a567801c7793e737c5502
     if not ( os.path.exists(tmp_d) or os.path.exists(new_d) ):
         if not os.path.exists(old_d):
             old_d = old_d + '.tmp'
@@ -227,6 +272,10 @@ def make_ver(new_v, old_v=None, alt_v=None):
     print "Make DIR: ",new_d
     outfile.flush()
     check_has_VC(new_v)
+<<<<<<< HEAD
+    print "NEW_D", new_d
+    result = call("cd " + new_d + " && "+ make_cmd, cwd=new_d, shell=True)
+=======
     #I suspect the following line is only needed because there is a bug elsewhere, and this is wasting bandwidth.
     set_revision(new_v, new_d)
     check_call("! test -L "+new_d, shell=True)
@@ -239,10 +288,12 @@ def make_ver(new_v, old_v=None, alt_v=None):
     #cwd= does not set $PWD or `pwd`
     #result = call(make_cmd, cwd=new_d, shell=True)
     result = call("cd "+new_d+" && "+make_cmd, shell=True)
+>>>>>>> a7364a2a4a75cccf9b1a567801c7793e737c5502
     if result == 0:
         print 'Make successful'
-        if not os.path.exists(new_d+"_bin/share/lyx/chkconfig.ltx"):
-            print 'But '+new_d+"_bin/share/lyx/chkconfig.ltx"+'Does not exist'
+        if not is_built(new_d):
+            #os.path.exists(new_d+"_bin/share/lyx/chkconfig.ltx"):
+            print 'But ' + new_d + is_built_suffix + ' Does not exist'
             result=3
         else:
             print 'CMD: (cd '+new_d+' && (make clean || make distclean)) && cd'+cache_dir+' && nice -19 tar -c "'+new_v+' | nice -19 gzip -9 > "'+ver2store(new_v) + '" && rm -rf "'+new_v+'"'

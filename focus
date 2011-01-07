@@ -1,0 +1,67 @@
+#!/bin/bash
+
+switchto () {
+if [ -z "$1" ]
+then
+	echo Usage "$0" PID|binname
+	echo e.g. "$0" firefox
+	echo e.g. "$0" 6103
+	exit
+elif echo "$1" | grep '[^[:digit:]]'
+then
+	echo binname: "$1"
+	BIN=`echo "$1" | cut -b1-15` # comm is only 15 chars long
+	echo BIN $BIN
+	PID=`ps x  -o pid= -o comm=  | grep ^......"$BIN$" |awk '{print $1}' `
+	#echo PID=`ps x  -o pid= -o comm= | grep ......"$BIN$"| awk '{print $1}' `
+	echo PID "$PID".
+else
+	PID="$1"
+fi
+echo PID $PID.
+if [ -z "$PID" ]
+then
+	return 1
+fi
+
+for P in $PID
+do
+	echo trying $P
+	WINDOW_ID=$(wmctrl -l -p | awk '/^[^ ]+ +[^ ]+ +'"$P"'/ {print $1}')
+	if [ ! -z "$WINDOW_ID" ]
+	then
+		break
+	fi
+done
+
+echo WINDOW_ID="$WINDOW_ID"
+if [ -z "$WINDOW_ID" ]
+then
+	echo No windows attached to $BIN $PID
+	return 1
+fi
+
+wmctrl -i -R "$WINDOW_ID"
+
+return 0
+
+}
+
+### MAINLINE
+CMD=""
+
+if [ "$1" = "-a" ]
+then 
+	CMD="$2"
+	shift
+	shift
+	switchto "$CMD" || switchto "$CMD-bin" || "$@"
+elif [ "$1" = "-R" ] 
+then 
+	shift 
+	switchto "$1"
+else
+	switchto "$1" || switchto "$1-bin" || "$@"
+fi
+	
+#wmctrl -i -R $(wmctrl -l -p | awk '/^[^ ]+ +[^ ]+ +'"$PID"'/ {print $1}')

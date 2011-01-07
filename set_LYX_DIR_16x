@@ -5,5 +5,6 @@ echo USER $USER
 #TMP_HOME=`mktemp foo.XXXXXXXX`
 TMP_HOME=$KT/tmpfs/$USER/kt.dir/kt.$USER.`date +%s`
 mkdir -p $TMP_HOME
+echo PWD `pwd`
 echo NO_STORE_RESULT=y HOME=$TMP_HOME SRC_DIR=`pwd`/src EXE_TO_TEST=`pwd`_bin/bin/lyx "$@"
-DONT_CP_dotLYX="y" NO_STORE_RESULT=y HOME=$TMP_HOME SRC_DIR=`pwd`/src EXE_TO_TEST=`pwd`_bin/bin/lyx "$@"
+DONT_CP_dotLYX="y" NO_STORE_RESULT=y HOME=$TMP_HOME SRC_DIR=`pwd`/src EXE_TO_TEST=`pwd`_bin/bin/$EXE_NAME "$@"

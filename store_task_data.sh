@@ -8,7 +8,7 @@ task_tar_data () {
 }
 
 $KT ./shared_variables.sh
-for F in $ROOT_OUTDIR/tasks/*.task
+for F in "$ROOT_OUTDIR"/tasks/*.task
 do
         task_tar_data `cat $F` > $F.data.tar.gz || true
 done

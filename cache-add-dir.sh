@@ -1,6 +1,8 @@
 #!/bin/bash
 
-BISECT_DIR=cache-bisect.dir
+. ./shared_variables.sh
+BISECT_DIR=$SRC_ROOT.cache
+#BISECT_DIR=cache-bisect.dir
 vers_fname="default_vers.txt"
 
 PWD_=`pwd`
@@ -8,7 +10,7 @@ PWD_=`pwd`
 
 set -e
 
-VER=`cd lyx && svn info | grep Revision: | sed s/Revision:.//`
+VER=`cd $SRC_ROOT && svn info | grep Revision: | sed s/Revision:.//`
 
 echo .$VER.
 
@@ -20,8 +22,8 @@ fi
 
 mkdir -p $BISECT_DIR/$VER/
 echo RSYNCING 
-echo rsync -a --progress --exclude '*.o' --exclude '*.lo' --exclude '*.emergency'  --exclude '#*#'  --exclude '~' --exclude 'Makefile' --exclude 'moc_*' --exclude '*.pyc' --exclude '*.gmo' --exclude '*.Po' --exclude 'ui_*.h' --exclude '*.a' --exclude '*.1' --exclude 'autom4te*' --exclude 'aclocal.m4' lyx/* lyx/.svn $BISECT_DIR/$VER/
-rsync -a --progress --exclude '*.o' --exclude '*.lo' --exclude '*.emergency'  --exclude '#*#'  --exclude '~' --exclude 'Makefile' --exclude 'moc_*' --exclude '*.pyc' --exclude '*.gmo' --exclude '*.Po' --exclude 'ui_*.h' --exclude '*.a' --exclude '*.1' --exclude 'autom4te*' --exclude 'aclocal.m4' lyx/* lyx/.svn $BISECT_DIR/$VER/ || true
+echo rsync -a --progress --exclude '*.o' --exclude '*.lo' --exclude '*.emergency'  --exclude '#*#'  --exclude '~' --exclude 'Makefile' --exclude 'moc_*' --exclude '*.pyc' --exclude '*.gmo' --exclude '*.Po' --exclude 'ui_*.h' --exclude '*.a' --exclude '*.1' --exclude 'autom4te*' --exclude 'aclocal.m4' $SRC_ROOT/* $SRC_ROOT/.svn $BISECT_DIR/$VER/
+rsync -a --progress --exclude '*.o' --exclude '*.lo' --exclude '*.emergency'  --exclude '#*#'  --exclude '~' --exclude 'Makefile' --exclude 'moc_*' --exclude '*.pyc' --exclude '*.gmo' --exclude '*.Po' --exclude 'ui_*.h' --exclude '*.a' --exclude '*.1' --exclude 'autom4te*' --exclude 'aclocal.m4' $SRC_ROOT/* $SRC_ROOT/.svn $BISECT_DIR/$VER/ || true
 echo RSYNC DONE
 echo cd  $BISECT_DIR/$VER/
 (cd  $BISECT_DIR/$VER/ && echo cd success && echo test "$PWD_" != `pwd` && [ "$PWD_" != "`pwd`" ] && echo dir is new && (svn diff . > autopatch.patch || echo made patch) && svn revert -R . echo reverted) && echo $VER >> $vers_fname

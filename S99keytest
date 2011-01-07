@@ -64,7 +64,7 @@ start () {
 	echo waiting for /tmp/.X11-unix/ to be created
 	sleep 3
  done
- if ! mount | grep $TMPFS
+ if ! mount | grep `readlink -f $TMPFS`
  then
 
 	echo mount tmpfs $TMPFS tmpfs -o size=400m
@@ -82,11 +82,12 @@ start () {
   chgrp keytest "$OUT_NAME"
   chmod g+w "$OUT_NAME"
   echo PWD `pwd`
-  sudo -H -u keytest ./sanity_check.sh > /dev/null && (
+  sudo -H -u keytest ./sanity_check.sh && (
   #sudo -H -u keytest nice -19 nohup bash ./initXvfb 1 bash ./main.sh >> /dev/null & 
 	echo STARTING
 	ps gaux | grep kill_too_much_mem || ( ./kill_too_much_mem.sh & )
-  	sudo -H -u keytest nice -19 ionice -c 3 nohup bash ./initXvfb 8 bash ./main.sh > tmpfs/nohup.log &
+  	(sudo -H -u keytest nice -19 ionice -c 3 nohup bash ./initXvfb 8 bash ./main.sh | ./cyclelog.sh) 2> /dev/null > /devnull &
+  	#sudo -H -u keytest nice -19 ionice -c 3 nohup bash ./initXvfb 8 bash ./main.sh > tmpfs/nohup.log &
  )
 
   #sudo -H -u keytest nice -19 ionice -c 3 nohup bash ./initXvfb 1 bash ./main.sh >> tmpfs/nohup.log &

@@ -1,12 +1,14 @@
 set -e
 
 pylint -e ./cache-bisect.py
+mkdir -p /var/cache/keytest/lyx-devel.cache/store/
+
+. ./shared_variables.sh
 
 # This script does a binary bisection on a KEYCODEpure file
 
 # If you want to avoid the complexity of this script. do something like:
 #  ./cache-bisect.py `pwd`/set_LYX_DIR_16x `pwd`/reproduce.sh `pwd`/examples/SplitScreenModify.KEYCODEpure
-
 D=7
 BISECT_AS_USER=keytest2
 #BISECT_AS_USER=xp
@@ -97,6 +99,8 @@ test_run () {
 
 DISPLAY=:$D xhost +localhost || true
 #( sudo -H -u $BISECT_AS_USER ./kt > /dev/null 2> /dev/null || true ; DISPLAY=:$D xwininfo -root > /dev/null 2> /dev/null || sudo -H -u $BISECT_AS_USER ./initXvfb $D > /dev/null 2>/dev/null ; DISPLAY=:$D LYX_NO_BACKTRACE_HELPER="y" ./cache-bisect.py sudo -H -u $BISECT_AS_USER $KT/doNtimes.sh 001 $KT/set_LYX_DIR_16x $TEST_COMMAND ) 2>&1 | tee $KEYCODEpure.full_bisect_log
+
+sudo -H -u "$BISECT_AS_USER" ./initXvfb $D
 
 (
 sudo -H -u "$BISECT_AS_USER" ./kt > /dev/null 2> /dev/null || true
