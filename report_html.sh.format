@@ -14,7 +14,7 @@ URL_OF_OUT=http://gmatht.homelinux.net/xp/keytest/$OUT_SUFFIX/
 CPP_HTML_DIR_REL=cpp_html
 CPP_HTML_DIR=$OUT/cpp_html
 
-LYX_VER=`$EXE_TO_TEST -version 2>&1 | head -n1 | sed s/^LyX\ // | sed s/\ .*// | sed s/1svn/0/ | sed s/2svn/1/ | sed s/3svn/2/ | sed s/4svn/3/ | sed s/5svn/4/ | sed s/6svn/5/ | sed s/7svn/6/ | sed s/8svn/7/ | sed s/9svn/8/`
+LYX_VER=`$GET_VERSION_COMMAND 2>&1 | head -n1 | sed s/^LyX\ // | sed s/\ .*// | sed s/1svn/0/ | sed s/2svn/1/ | sed s/3svn/2/ | sed s/4svn/3/ | sed s/5svn/4/ | sed s/6svn/5/ | sed s/7svn/6/ | sed s/8svn/7/ | sed s/9svn/8/`
 BOILER_PLATE=`cd $SRC_DIR ; svn info 2>&1 | grep Revision`
 
 tidy_keycode () {
@@ -54,7 +54,13 @@ trac_keycode() {
 }
 
 line2url() {
-	printf '%s' "$*" | sed 's/&/%26/g' | sed 's/"/%22/g' | sed 's/#/%23/g' | sed 's/;/%3B/g' #| sed 's/\\//g'
+	printf '%s' "$*" | sed 's/&/%26/g
+s/"/%22/g
+s/#/%23/g
+s/;/%3B/g
+s/</&lt;/g
+s/>/&gt;/g'
+	#printf '%s' "$*" | sed 's/&/%26/g' | sed 's/"/%22/g' | sed 's/#/%23/g' | sed 's/;/%3B/g' | sed 's/</&lt;/g' | sed 's/>/&gt;/g' #| sed 's/\\//g'
 }
 
 text2url() {
@@ -101,7 +107,7 @@ search_bug_url () {
 gdb2html() {
 echo g $g'<br/>'
 #cat $g
-(head $g -n 100 | sed 's/&/\&amp;/g' | sed 's/</\&lt;/g' | sed 's/  /\&nbsp /g'; echo --------; $EXE_TO_TEST -version  2>&1)  | while read -r l
+(head $g -n 100 | sed 's/&/\&amp;/g' | sed 's/</\&lt;/g' | sed 's/  /\&nbsp /g'; echo --------; $GET_VERSION_COMMAND  2>&1)  | while read -r l
 do
 	#We may want to support slashes later, but we'd have to support browsing
 	#Qt source for that to be useful for LyX
