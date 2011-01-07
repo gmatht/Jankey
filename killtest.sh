@@ -11,6 +11,7 @@ killall xterm
 killall replay.sh
 killall xclip
 kill $AUTOLYX $TESTPY
+killall checklimits.sh
 sleep 0.3
 killall autolyx -9
 killall test.py -9
@@ -19,6 +20,6 @@ killall gdb -9
 killall xterm -9
 killall replay.sh -9
 killall xclip -9
+killall checklimits.sh -9
 $KT/killall_p reproduce
 $KT/killall_p doNtimes
-kill $AUTOLYX $TESTPY -9

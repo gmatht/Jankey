@@ -1,11 +1,19 @@
 #!/bin/bash
 # Installs keytest 
-# Maybe this shouldn't use sudo, and should just be run as root.
 
-if [ "$USER" != ROOT ]
+if [ "$USER" != root ]
 then
 	echo Need to be root to install, but USER="$USER" 
 	exit 1
+fi
+
+mkdir /var/cache/keytest
+if [ -z "$SUDO_USER" ]
+then
+	echo we would like to chmod /var/cache/keytest to be the SUDO_USER, but we do not seem to have been run from sudo
+else
+	chown $SUDO_USER /var/cache/keytest
+	chown $SUDO_USER out
 fi
 
 KT=`dirname "$0"`
@@ -18,8 +26,8 @@ addgroup keytest2 keytest
 
 if ! grep keytest /etc/sudoers
 then
-	#echo allowing admin users to switch to keytest user
-	#echo '%adm ALL =(keytest,keytest2) NOPASSWD: ALL' >> /etc/sudoers
+	echo allowing admin users to switch to keytest user
+	echo '%adm ALL =(keytest,keytest2) NOPASSWD: ALL' >> /etc/sudoers
 fi
 # cat /mnt/jaunty/etc/cups/printers.conf |grep -o '[^ ]*>$' |grep -v '^<'| sed 's/>$//'
 
@@ -30,7 +38,7 @@ then
 	exit
 fi
 	
-if grep -v "^DenyUser keytest$" /etc/cups/printers.conf | DenyUser /etc/cups/printers.conf
+if grep -v "^DenyUser keytest$" /etc/cups/printers.conf | grep DenyUser /etc/cups/printers.conf
 then
 	echo There are already denied users. We do not support this yet, exiting
 	exit
@@ -43,6 +51,8 @@ do
 	echo lpadmin -p $L -u deny:keytest,keytest2
 	lpadmin -p $L -u deny:keytest,keytest2
 done
+
+
 
 
 # change this to true to install this as a service

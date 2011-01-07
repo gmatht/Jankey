@@ -17,4 +17,5 @@ done
 #(DISPLAY=:1 sudo -u keytest -H nice -18 ; cd $PWD ; ./autolyx)
 ./killtest.sh # kill any previous test, so does not interfere
 echo main DISPLAY=$DISPLAY
+nohup ./checklimits.sh > checklimits.log &
 ./autolyx
