@@ -1,4 +1,4 @@
-MAX_RSS=64000
+MAX_RSS=164000
 
 handle_ps_line () {
 	RSS="$6"
@@ -6,7 +6,8 @@ handle_ps_line () {
 	if [ $RSS -gt $MAX_RSS ] 
 	then 
 		echo KILLING "$2" .. "$6"
-		kill -sSIGXCPU "$2"
+		#kill -s XCPU "$2"
+		kill "$2"
 		sleep 1
 		kill -9 "$2"
 	fi
