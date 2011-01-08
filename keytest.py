@@ -283,11 +283,17 @@ def check_mem():
         kill_lyx()
     time.sleep(1)
 
+pid_has_existed=False
     
 def lyx_sleeping():
     fname = '/proc/' + lyx_pid + '/status'
     if not os.path.exists(fname):
+        if pid_has_existed:
+             print "PID has disapearred!!! Aborting!!!"
+             sys.stdout.flush()
+             os._exit(1)
         return False
+    pid_has_existed=True
     f = open(fname, 'r')
     lines = f.readlines()
     sleeping = lines[1].find('(sleeping)') > 0
