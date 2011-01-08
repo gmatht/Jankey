@@ -14,10 +14,9 @@ WINDOWS_MANAGER="metacity"
 
 EXE_NAME=lyx
 LYX_WINDOW_NAME=lyx
-GET_VERSION_COMMAND=$EXE_TO_TEST -version
 export RAISE_WINDOW_CMD="./focus -R $LYX_WINDOW_NAME"
 if [ -z $SRC_DIR ]
-then 
+then
 	SRC_DIR=lyx/src
 fi
 if [ -z $EXE_TO_TEST ]
@@ -34,7 +33,9 @@ else
 	exit 1
 fi
 
-SRC_ROOT=`pwd`/$SRC_ROOT
+GET_VERSION_COMMAND="$EXE_TO_TEST -version"
+#SRC_ROOT=`pwd`/$SRC_ROOT
+SRC_ROOT=/var/cache/keytest/lyx-devel
 export SRC_ROOT
 export EXE_NAME
 export KEYTEST_HARDCODE=LYX
