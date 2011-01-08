@@ -10,7 +10,7 @@ TMP_DIR=`get_tmp_dir $USER $OUT_NAME`
 LOG_FILE=$TMP_DIR/log
 ROOT_OUTDIR="$DIRNAME0/$OUT_NAME"
 WINDOWS_MANAGER="metacity"
-export LD_LIBRARY_PATH=abiword/src/.libs
+#export LD_LIBRARY_PATH=abiword/src/.libs
 
 EXE_NAME=lyx
 LYX_WINDOW_NAME=lyx
