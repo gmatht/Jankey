@@ -20,6 +20,11 @@ mkdirp () {
 	chmod g+w "$1"
 } 
 
+CRITICAL() {
+	echo "$@" >> tmpfs/CRITICAL
+        sleep 5
+}
+
 kill_exe() {
 	killall evince-previewer latex pdflatex
 	killall_children $EXE_NAME
@@ -217,6 +222,10 @@ full_exit() {
 }
 
 run_gdb () {
+  if [ ! -x $EXE_TO_TEST ]
+  then
+	CRITICAL "'$EXE_TO_TEST' is not Executable!!!"
+  fi
   #Spawn a process to kill lyx if it runs too long
   if ! touch $GDB
   then
