@@ -171,6 +171,7 @@ def is_built(d):
     print "p: "+p
     ib = os.path.exists(p) 
     print "ib: ", ib
+    print >> outfile, "p: "+p,  "  ib: ", ib 
     return ib 
 
 def make_ver(new_v, old_v=None, alt_v=None):
