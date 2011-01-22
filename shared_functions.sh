@@ -231,6 +231,7 @@ run_gdb () {
   if [ -d "$EXE_TO_TEST" ]
   then
 	CRITICAL "$EXE_TO_TEST" is a "directory!!!" 
+  fi
   if [ ! -x $EXE_TO_TEST ]
   then
 	CRITICAL "'$EXE_TO_TEST' is not Executable!!!"
