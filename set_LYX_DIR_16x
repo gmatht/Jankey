@@ -5,6 +5,7 @@ KT=`dirname "$0"`
 KT=`cd $KT; pwd`
 . $KT/shared_variables.sh
 echo USER $USER
+. $KT/shared_variables.sh
 #TMP_HOME=`mktemp foo.XXXXXXXX`
 TMP_HOME=$KT/tmpfs/$USER/kt.dir/kt.$USER.`date +%s`
 mkdir -p $TMP_HOME
