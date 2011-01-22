@@ -43,9 +43,12 @@ then
 	EXE_TO_TEST=`readlink -f "$EXE_TO_TEST"` # softlinks can confuse "ps"
 	echo EXE_TO_TEST $EXE_TO_TEST
 else
+	pwd
 	echo EXE_TO_TEST $EXE_TO_TEST does not exist D
-	exit 1
+	#exit 1
 fi
+
+export BISECT_IN_PLACE="y"
 
 SRC_ROOT=`pwd`/$SRC_ROOT
 export SRC_ROOT
