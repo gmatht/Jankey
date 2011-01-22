@@ -59,7 +59,8 @@ echo $LATEST_FILE | (
 	echo
 	grep "VIOLATED" $LATEST_FILE/$SEC.GDB
 	grep "signal SIG" $LATEST_FILE/$SEC.GDB
-	grep "lyx::" $LATEST_FILE/$SEC.GDB
+	grep "lyx::" $LATEST_FILE/$SEC.GDB ||
+            grep "signal SIG" -A 9  $LATEST_FILE/$SEC.GDB | tail -n 8
   else
 	ls $LATEST_FILE -lot | head
 	grep -A 19 "signal SIG" `echo $LATEST_FILE | sed s/KEYCODEpure.replay/GDB/`
@@ -75,7 +76,7 @@ Trace
 reproduced
 X_PID
 x-session" | grep -v kill | grep -v Terminated | tail -n 9
-#exit
+#exitTEST_FILE/$SEC.GDB
 echo autolyx crashes ---------
 tail -n 10000 $LOG_FILE | grep autolyx: | grep -v kill | grep -v Terminated | grep -v grep #-A 5
 echo python crashes ---------
