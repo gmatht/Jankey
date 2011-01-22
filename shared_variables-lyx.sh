@@ -5,7 +5,7 @@ get_tmp_dir () {
 
 DIRNAME0=`dirname "$0"`
 #OUT_NAME=out/branch_16_a/
-OUT_NAME=out/t12/
+OUT_NAME=out/t13/
 TMP_DIR=`get_tmp_dir $USER $OUT_NAME`
 LOG_FILE=$TMP_DIR/log
 ROOT_OUTDIR="$DIRNAME0/$OUT_NAME"
@@ -24,14 +24,14 @@ then
 	EXE_TO_TEST=$SRC_DIR/lyx
 fi
 
-if [ -e $EXE_TO_TEST ]
-then
-	EXE_TO_TEST=`readlink -f "$EXE_TO_TEST"` # softlinks can confuse "ps"
-	echo EXE_TO_TEST $EXE_TO_TEST
-else
-	echo EXE_TO_TEST $EXE_TO_TEST does not exist D
-	exit 1
-fi
+#if [ -e $EXE_TO_TEST ]
+#then
+#	EXE_TO_TEST=`readlink -f "$EXE_TO_TEST"` # softlinks can confuse "ps"
+#	echo EXE_TO_TEST $EXE_TO_TEST
+#else
+#	echo EXE_TO_TEST $EXE_TO_TEST does not exist D
+#	exit 1
+#fi
 
 GET_VERSION_COMMAND="$EXE_TO_TEST -version"
 #SRC_ROOT=`pwd`/$SRC_ROOT
