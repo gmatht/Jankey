@@ -1,5 +1,13 @@
 set -e
 
+count=$1
+if [ ! "$count" -gt 0 ]
+then
+    echo The first parameter must be an integer greater than 0
+    exit 1
+fi
+shift
+
 pylint -e ./cache-bisect.py
 mkdir -p /var/cache/keytest/lyx-devel.cache/store/
 
@@ -106,8 +114,11 @@ sudo -H -u "$BISECT_AS_USER" ./initXvfb $D
 sudo -H -u "$BISECT_AS_USER" ./kt > /dev/null 2> /dev/null || true
 DISPLAY=:$D xwininfo -root > /dev/null 2> /dev/null ||
 	test_run sudo -H -u "$BISECT_AS_USER" ./initXvfb $D
-DISPLAY=:$D LYX_NO_BACKTRACE_HELPER="y" ./cache-bisect.py sudo -H -u "$BISECT_AS_USER" "$KT/doNtimes.sh" 0009 "$KT/set_LYX_DIR_16x" $TEST_COMMAND	
+DISPLAY=:$D LYX_NO_BACKTRACE_HELPER="y" ./cache-bisect.py sudo -H -u "$BISECT_AS_USER" "$KT/doNtimes.sh" $count "$KT/set_LYX_DIR_16x" $TEST_COMMAND	
 ) #2>&1 | tee $KEYCODEpure.full_bisect_log
 
 mkdir -p out/cache-bisect/store
 cp /tmp/cache-bisect.xp.log  out/cache-bisect/store/`basename "$1"`
+
+echo -----
+tail tmpfs/CRITICAL

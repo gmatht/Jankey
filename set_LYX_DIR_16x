@@ -1,11 +1,27 @@
 #!/bin/bash
+#This file is really badly named. It sets up directories so that the bisection tests the binary from the source dir `pwd` (the current directory)
+# It no longer is lyx specific let alone specific to version 1.6.x.
 KT=`dirname "$0"`
 KT=`cd $KT; pwd`
+. $KT/shared_variables.sh
 echo USER $USER
 . $KT/shared_variables.sh
 #TMP_HOME=`mktemp foo.XXXXXXXX`
 TMP_HOME=$KT/tmpfs/$USER/kt.dir/kt.$USER.`date +%s`
 mkdir -p $TMP_HOME
-echo PWD `pwd`
-echo NO_STORE_RESULT=y HOME=$TMP_HOME SRC_DIR=`pwd`/src EXE_TO_TEST=`pwd`_bin/bin/lyx "$@"
-DONT_CP_dotLYX="y" NO_STORE_RESULT=y HOME=$TMP_HOME SRC_DIR=`pwd`/src EXE_TO_TEST=`pwd`_bin/bin/$EXE_NAME "$@"
+if [ -z $BISECT_DIR ]
+then 
+    BISECT_DIR=`pwd`
+else
+    cd $BISECT_DIR
+fi
+echo PWD  
+#echo NO_STORE_RESULT=y HOME=$TMP_HOME SRC_DIR=$BISECT_DIR/src EXE_TO_TEST=${BISECT_DIR}_bin/bin/$EXE_NAME "$@"
+echo DONT_CP_dotLYX="y" NO_STORE_RESULT=y HOME=$TMP_HOME SRC_DIR=${BISECT_DIR}/src EXE_TO_TEST=${BISECT_DIR}_bin/bin/$EXE_NAME "$@"
+sleep 5
+if [ "$BISECT_IN_PLACE" = y ]
+then
+    DONT_CP_dotLYX="y" NO_STORE_RESULT=y HOME=$TMP_HOME SRC_DIR=${BISECT_DIR}/src "$@"
+else 
+    DONT_CP_dotLYX="y" NO_STORE_RESULT=y HOME=$TMP_HOME SRC_DIR=${BISECT_DIR}/src EXE_TO_TEST=${BISECT_DIR}_bin/bin/$EXE_NAME "$@"
+fi

@@ -41,6 +41,10 @@ cache_dir = source_dir + '.cache/'  # must end in a slash
 #	cache_dir = source_dir + '.cache/'  # must end in a slash
 #	source_dir = '/mnt/sdb7/xp/src/svn2/lyx-1.6.x'
 
+bisect_in_place=False
+if os.environ.get("BISECT_IN_PLACE") is not None: 
+	bisect_in_place = (os.environ["BISECT_IN_PLACE"].lower()=='y')  
+keep_src_dirs=bisect_in_place
 store_dir = cache_dir + 'store/'
 
 os.system('mkdir -p ' + store_dir)
@@ -202,15 +206,16 @@ def make_ver(new_v, old_v=None, alt_v=None):
 	    #os.system("cd " + old_d + " && for d in ` find . -type d | grep -v '/.svn'` ; do svn status|egrep '^\?'|awk '{print $2}'|xargs rm -rf; done")
 	    print "OLD_D", old_d
             check_call("! test -L "+old_d, shell=True)
-            check_call("test -e /mnt/modern/xp/src/lyx-devel/src/lyx", shell=True)
+            #check_call("test -e /mnt/modern/xp/src/lyx-devel/src/lyx", shell=True)
             #call(['make', 'distclean'], cwd=old_d)
-            call('cd ' + old_d + ' && make distclean', shell=True)
-	    print "OLD_D2", old_d
-            check_call("! test -L "+old_d, shell=True)
-            check_call("test -e /mnt/modern/xp/src/lyx-devel/src/lyx", shell=True)
-            call('cd ' + old_d + ' && make clean', shell=True)
-            #call(['make', 'clean'], cwd=old_d)
-            check_call("test -e /mnt/modern/xp/src/lyx-devel/src/lyx", shell=True)
+            if not keep_src_dirs:
+                call('cd ' + old_d + ' && make distclean', shell=True)
+	        print "OLD_D2", old_d
+                check_call("! test -L "+old_d, shell=True)
+                ##check_call("test -e /mnt/modern/xp/src/lyx-devel/src/lyx", shell=True)
+                call('cd ' + old_d + ' && make clean', shell=True)
+                #call(['make', 'clean'], cwd=old_d)
+                ##check_call("test -e /mnt/modern/xp/src/lyx-devel/src/lyx", shell=True)
     fail_d = new_d + '.fail'
     tmp_d = new_d + '.tmp'
     check_call("! test -L "+tmp_d, shell=True)
@@ -245,16 +250,16 @@ def make_ver(new_v, old_v=None, alt_v=None):
 		print >> outfile, "Untarred and moved"
 	else:
                 # That the following is required indicates there is a bug somewhere else in the code.
-                check_call("! test -L "+old_d, shell=True)
+                #check_call("! test -L "+old_d, shell=True)
                 if not os.path.exists(old_d+"/.svn"):
 		    print "Cannot find: "+ old_d+"/.svn"
 		    print >> outfile, "Cannot find: "+ old_d+"/.svn"
                     old_d=source_dir
-	        call(['echo', 'cp', '-ru', old_d, tmp_d + '.cp'])
-                check_call("! test -L "+old_d, shell=True)
-	        call(['cp', '-ru', old_d, tmp_d + '.cp'])
+	        call(['echo', 'cp', '-ru', old_d+"/", tmp_d + '.cp'])
+                #check_call("! test -L "+old_d, shell=True)
+	        call(['cp', '-ru', old_d+"/", tmp_d + '.cp'])
                 check_call("! test -L "+tmp_d + '.cp', shell=True)
-		print "Copyed " + old_d + " to " + new_d
+		print "Copyed " + old_d+"/" + " to " + new_d
 		print >> outfile, "Copyed " + old_d + " to " + new_d
         	check_call(['mv', tmp_d + '.cp', tmp_d])
                 check_call("! test -L "+tmp_d, shell=True)
@@ -293,9 +298,9 @@ def make_ver(new_v, old_v=None, alt_v=None):
             result=3
         else:
             print 'CMD: (cd '+new_d+' && (make clean || make distclean)) && cd'+cache_dir+' && nice -19 tar -c "'+new_v+' | nice -19 gzip -9 > "'+ver2store(new_v) + '" && rm -rf "'+new_v+'"'
-            check_call("test -e /mnt/modern/xp/src/lyx-devel/src/lyx", shell=True)
+            #check_call("test -e /mnt/modern/xp/src/lyx-devel/src/lyx", shell=True)
             os.system('(cd ' +new_d+' && (make clean || make distclean)) && cd'+cache_dir+' && nice -19 tar -c "'+new_v+' | nice -19 gzip -9 > "'+ver2store(new_v) + '" && rm -rf "'+new_v+'"')
-            check_call("test -e /mnt/modern/xp/src/lyx-devel/src/lyx", shell=True)
+            #check_call("test -e /mnt/modern/xp/src/lyx-devel/src/lyx", shell=True)
     print >> outfile, "Make result: ",result
     outfile.flush()
     return result
@@ -351,7 +356,9 @@ def run_cmd(cmd, v):
     print "V2D", ver2dir(v)
     #result = subprocess.call(cmd, shell=True, cwd=ver2dir(v))
     os.system('mkdir -p "'+ver2dir(v)+'"')
+    os.environ["BISECT_DIR"]=ver2dir(v)
     result = call(cmd, cwd=ver2dir(v))
+    #result = call("cd '"+ver2dir(v)+' && '+cmd)
     #result = call("cd "+ver2dir(v)+" && "+cmd, cwd=ver2dir(v))
     # Uncommenting the following line will cause the "tar -zxf" process to be killed
     # AFAICT this *should* is impossible because clean_up shouldn't even run at the
