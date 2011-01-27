@@ -1,9 +1,18 @@
 set -e
 
 count=$1
+
+
+if echo $count | grep [^[:digit:]] > /dev/null
+then
+    echo The first parameter must be an integer greater than 0
+    echo representing the number of retries used when attempting to reproduce a bug
+fi
+
 if [ ! "$count" -gt 0 ]
 then
     echo The first parameter must be an integer greater than 0
+    echo representing the number of retries used when attempting to reproduce a bug
     exit 1
 fi
 shift
@@ -30,7 +39,7 @@ absname () {
         echo "$1" | grep ^/ || ( echo `pwd`/"$1" )
 }
 
-TEST_FILE=`echo "$1" | sed s,^file://,,`
+TEST_FILE=`echo "$1" | sed s,^file://,, | sed 's/html$/KEYCODEpure/'`
 #echo $TEST_FILE
 #exit
 TEST_FILE=`echo "$TEST_FILE" | sed s,^http://.*/keytest/,,`
@@ -117,8 +126,10 @@ DISPLAY=:$D xwininfo -root > /dev/null 2> /dev/null ||
 DISPLAY=:$D LYX_NO_BACKTRACE_HELPER="y" ./cache-bisect.py sudo -H -u "$BISECT_AS_USER" "$KT/doNtimes.sh" $count "$KT/set_LYX_DIR_16x" $TEST_COMMAND	
 ) #2>&1 | tee $KEYCODEpure.full_bisect_log
 
+echo mkdir -p out/cache-bisect/store
 mkdir -p out/cache-bisect/store
-cp /tmp/cache-bisect.xp.log  out/cache-bisect/store/`basename "$1"`
+echo cp /tmp/cache-bisect.xp.log  out/cache-bisect/store/`basename "$TEST_FILE"`
+cp /tmp/cache-bisect.xp.log  out/cache-bisect/store/`basename "$TEST_FILE"`
 
 echo -----
 tail tmpfs/CRITICAL
