@@ -221,7 +221,17 @@ full_exit() {
 	exit
 }
 
+#crit_error () {
+#	echo "$@"
+#	sleep 9
+#	full_exit
+#}
+
 run_gdb () {
+  if [ -d "$EXE_TO_TEST" ]
+  then
+	CRITICAL "$EXE_TO_TEST" is a "directory!!!" 
+  fi
   if [ ! -x $EXE_TO_TEST ]
   then
 	CRITICAL "'$EXE_TO_TEST' is not Executable!!!"
@@ -688,7 +698,7 @@ sanity_checks () {
 	exit 1
  fi
 
- TMPFS_USED=`df tmpfs/ | grep -o ...% | sed s/[^[:digit:]]//g`
+ TMPFS_USED=`df tmpfs/ | grep -o ...% | sed s/[^[:digit:]]//g | grep .`
  if [ "$TMPFS_USED" -gt 95 ]
  then
 	echo "More than 95% ($TMPFS_USED%) of tmpfs/ is used"

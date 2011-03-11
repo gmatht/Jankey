@@ -58,10 +58,13 @@ line2url() {
 s/"/%22/g
 s/#/%23/g
 s/;/%3B/g
-s/</&lt;/g
-s/>/&gt;/g'
+s/</%3C/g
+s/>/%3E/g'
 	#printf '%s' "$*" | sed 's/&/%26/g' | sed 's/"/%22/g' | sed 's/#/%23/g' | sed 's/;/%3B/g' | sed 's/</&lt;/g' | sed 's/>/&gt;/g' #| sed 's/\\//g'
 }
+
+#s/</&lt;/g
+#s/>/&gt;/g'
 
 text2url() {
 	#echo "$@" | 

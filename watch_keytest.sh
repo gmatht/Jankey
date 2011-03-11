@@ -76,7 +76,7 @@ Trace
 reproduced
 X_PID
 x-session" | grep -v kill | grep -v Terminated | tail -n 9
-#exit
+#exitTEST_FILE/$SEC.GDB
 echo autolyx crashes ---------
 tail -n 10000 $LOG_FILE | grep autolyx: | grep -v kill | grep -v Terminated | grep -v grep #-A 5
 echo python crashes ---------
