@@ -59,7 +59,8 @@ echo $LATEST_FILE | (
 	echo
 	grep "VIOLATED" $LATEST_FILE/$SEC.GDB
 	grep "signal SIG" $LATEST_FILE/$SEC.GDB
-	grep "lyx::" $LATEST_FILE/$SEC.GDB
+	grep "lyx::" $LATEST_FILE/$SEC.GDB ||
+            grep "signal SIG" -A 9  $LATEST_FILE/$SEC.GDB | tail -n 8
   else
 	ls $LATEST_FILE -lot | head
 	grep -A 19 "signal SIG" `echo $LATEST_FILE | sed s/KEYCODEpure.replay/GDB/`
