@@ -104,5 +104,6 @@ echo built index.html
 echo $URL_OF_OUT/indexreport.html
 if [ ! -z "$DISPLAY" ]
 then
-	google-chrome $OUT/index.html && wmctrl -R '- Google Chrome'
+	#google-chrome $OUT/index.html && wmctrl -R '- Google Chrome'
+	google-chrome $OUT/index.html && wmctrl -R 'index.html'
 fi
