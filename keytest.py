@@ -20,6 +20,8 @@ from math import sqrt
 # We could possibly adjust this depending on the amount of 
 # memory availiable
 
+pid_has_existed=False
+
 def get_max_rss(max_MiB, max_percent):
     F = open('/proc/meminfo','r')
     L = F.readline()
@@ -94,6 +96,13 @@ class CommandSource:
 
         for k in ascii_keys:
             keycode[:0] = ["\C" + chr(k)]
+        
+	#Some bugs only occur if there is a delay between keypresses
+	keycode[:0] = ["\D1"] # 100ms delay
+	keycode[:0] = ["\D2"] # 200ms delay
+	keycode[:0] = ["\D3"] # 300ms delay
+	keycode[:0] = ["\D5"] # 500ms delay
+	keycode[:0] = ["\D9"] # 900ms delay
 
         keycode[:0] = ["\Atp\D5\t\D5i\D5\[Down]\D5s\D5\Ap\D5\As"]
         # We probably don't need shift because we can just use the ascii code for the uppercase characters.
@@ -283,9 +292,9 @@ def check_mem():
         kill_lyx()
     time.sleep(1)
 
-pid_has_existed=False
     
 def lyx_sleeping():
+    global pid_has_existed
     fname = '/proc/' + lyx_pid + '/status'
     if not os.path.exists(fname):
         if pid_has_existed:
@@ -418,7 +427,7 @@ outfile = open(outfilename, 'w')
 print "KPP02" ; sys.stdout.flush()
 
 RaiseWindow()
-print "KPP03" ; sys.stdout.flush()
+print "KPP03", lyx_pid ; sys.stdout.flush()
 sendKeystring("\Afn", lyx_pid)
 print "KPP04" ; sys.stdout.flush()
 write_commands = True
