@@ -21,6 +21,7 @@ mkdirp () {
 } 
 
 CRITICAL() {
+	echo "$@" 1>&2
 	echo "$@" >> tmpfs/CRITICAL
         sleep 5
 }
@@ -181,21 +182,22 @@ calc_confirm_file() {
 }
 
 get_pid () {
-	sleep 3
+	sleep 1
 	echo getting pidof "$1" 1>&2
 	#PID=`ps "-u$USER" "$2" | grep "$1" | grep -v grep | sed 's/^ *//g'|  sed 's/ .*$//'`
 	PID=`ps x | grep "$1" | grep -v grep | grep -v "gdb " | sed 's/^ *//g'|  sed 's/ .*$//'`
 	echo "$PID" | ( grep " " > /dev/null && ( echo ERROR too many PIDs 1>&2 ; ps x ; full_exit ) )
 	nPIDs=`echo PID "$PID" | wc -l`
 	echo nPIDs $nPIDs 1>&2
-	sleep 1
+	#sleep 1
 	echo -- if [ "$nPIDs" != "1" ] 1>&2
 	if test "$nPIDs" != "1" #2> /tmp/testerr
 	then 
 		echo autolyx: Wrong number of PIDs "$nPIDs" "($1)" "($2)" 1>&2
 		echo autolyx: PIDs "$PID" 1>&2
 		ps x 1>&2
-		echo -----
+		sleep 5
+		echo ----- 1>&2
 	fi
 	echo "$PID"
 	echo got pidof "$1" 1>&2
@@ -426,7 +428,7 @@ do_one_test() {
   mkdirp $NEWHOME
   chmod g+w $TMP_DIR/kt.dir
   mkdir $NEWHOME
-  NEWHOME=`cd $NEWHOME || (echo CANNOT CD TO NEW HOME $NEWHOME 1>&2 ; sleep 9 ; full_exit) ; pwd`
+  NEWHOME=`cd $NEWHOME || (CRITICAL CANNOT CD TO NEW HOME $NEWHOME ; full_exit) ; pwd`
   echo NEWHOME $NEWHOME
   mkdirp "$NEWHOME"
   test -z "$DONT_CP_dotLYX" && cp -rv $DIRNAME0/$dotLYX "$NEWHOME"/
@@ -436,7 +438,7 @@ do_one_test() {
   #rm -rf "$NEWHOME"/.lyx-
   #cp -rv ~xp/.lyx- "$NEWHOME"/.lyx-
   #ls "$NEWHOME"/.lyx- > /tmp/ls_NEW.log
-  ( sleep 9 &&
+  ( sleep 4 &&
      ps a | grep $EXE_NAME 
 	echo -- 1 || full_exit
      LYX_PID=""
@@ -464,7 +466,12 @@ do_one_test() {
      sleep 0.1
      killall xclip
 
-     
+     #if echo $LYX_PID | grep '[-]' > /dev/null
+     #then
+        ##CRITICAL INVALID PID VALUE
+	#full_exit
+     #fi
+    
 
      echo -- if [ ! -z "$LYX_PID" ]
      if [ ! -z "$LYX_PID" ]
@@ -504,17 +511,18 @@ do_one_test() {
      kill_all_children $LYX_PID
      kill_exe
      sleep 0.1
-     kill -9 "$LYX_PID" || true
+     echo kill -9 "$LYX_PID" || true
+     kill -9 $LYX_PID || true
      #killall -9 $EXE_NAME #sometimes LyX really doesn't want to die causing the script to freeze
      #killall lyx #sometimes LyX really doesn't want to die causing the script to freeze
-     sleep 1
+     #sleep 0.1
      #kill -9 "$LYX_PID" #sometimes LyX really doesn't want to die causing the script to freeze
 
      #sleep 1 
      #killall -9 lyx
      ) &
   CHILD_PID="$!"
-  ls $EXE_TO_TEST ; sleep 1
+  ls $EXE_TO_TEST #; sleep 1
    pwd
   
   #You may want to use the following to simulate SIGFPE
@@ -542,7 +550,7 @@ do_one_test() {
   echo END gdb2
   # these tend to take up a huge amount of space:
   echo will erase "$NEWHOME"
-  sleep 2
+  #sleep 2
   rm -rf $NEWHOME
   #if (grep " signal SIG[^TK]" $GDB || grep KILL_FREEZE $KEYCODE)
   if interesting_crash
@@ -603,7 +611,7 @@ do_one_test() {
     if ! test -z "$BAK"
     then
 	  echo will erase '$BAK/*'="'$BAK/*'"
-	  sleep 2
+	  #sleep 2
           rm -rf $BAK/*
     	  mv $OUTDIR/$SEC.* $BAK/
     else
