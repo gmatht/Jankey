@@ -447,7 +447,7 @@ do_one_test() {
      while [ -z "$LYX_PID" -a 200 -gt $i ]
      do
 	     #export LYX_PID=`ps a | grep /src/lyx | grep -v grep | sed 's/^ *//g'|  sed 's/ .*$//'`
-	     export LYX_PID=`get_pid "$EXE_TO_TEST$" `
+	     export LYX_PID=`get_pid "$EXE_TO_TEST *$EXE_TO_TEST_ARGS$" `
 	     echo LYXPID "$LYX_PID" || full_exit
 	     sleep 0.1
 	     i=$(($i+1))

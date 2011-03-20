@@ -1,0 +1,26 @@
+Index: development/scons/scons_manifest.py
+===================================================================
+--- development/scons/scons_manifest.py	(revision 31540)
++++ development/scons/scons_manifest.py	(revision 31541)
+@@ -2657,7 +2657,7 @@
+     docbook-chapter.layout
+     docbook-section.layout
+     docbook.layout
+-    doublecol.layout
++    doublecol-new.layout
+     dtk.layout
+     egs.layout
+     elsart.layout
+Index: lib/Makefile.am
+===================================================================
+--- lib/Makefile.am	(revision 31540)
++++ lib/Makefile.am	(revision 31541)
+@@ -1026,7 +1026,7 @@
+ 	layouts/docbook-chapter.layout \
+ 	layouts/docbook-section.layout \
+ 	layouts/docbook.layout \
+-	layouts/doublecol.layout \
++	layouts/doublecol-new.layout \
+ 	layouts/dtk.layout \
+ 	layouts/egs.layout \
+ 	layouts/elsart.layout \
