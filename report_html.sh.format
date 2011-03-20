@@ -138,7 +138,7 @@ done | sed 's/^/<br\/>/'
 }
 
 get_description() {
-	echo "Keycodes: "
+	( echo "Keycodes: "
 	trac_keycode
 	ii=1
 	echo
@@ -170,7 +170,7 @@ get_description() {
 	cat $g | head -n 50 # If we do not limit length we may get "too long url" errors.
 	echo '}}}'
 	echo
-	echo For more info see the "[[$URL_OF_OUT/$HTML_NAME Keytest Report]]"
+	echo For more info see the "[[$URL_OF_OUT/$HTML_NAME Keytest Report]]" ) | tee $OUT/$SEC.txt
 }
 
 svn_revision() {
@@ -240,7 +240,7 @@ make_one_bug () {
 	(echo -n "<br/><a href=\"$SEC.html\">$TITLE</a> " 
 	html_keycode 
 	#echo -n " [<a href=\"`search_bug_url`\">search</a>] [<a href=\"`report_bug_url`\">report</a>] <a href=\"$SEC.screenshot.html\">screenshots</a>" 
-	echo -n " [<a href=\"`search_bug_url`\">search</a>] [<a href=\"`report_bug_url`\">report</a>]" 
+	echo -n " [<a href=\"`search_bug_url`\">search</a>] [<a href=\"`report_bug_url`\">report</a>] [<a href=\"$SEC.txt\">txt</a>]" 
 	if ls $f_base.s*.png > /dev/null
 	then
 		echo -n " <a href=\"$SEC.screenshot.html\">screenshots</a>" 
