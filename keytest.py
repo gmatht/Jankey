@@ -295,6 +295,8 @@ def check_mem():
     
 def lyx_sleeping():
     global pid_has_existed
+    if lyx_pid.find("\n") >= 0:
+       return False # FIXME: this just disables this feature for multi-process applications 
     fname = '/proc/' + lyx_pid + '/status'
     if not os.path.exists(fname):
         if pid_has_existed:
