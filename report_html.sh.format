@@ -15,7 +15,7 @@ CPP_HTML_DIR_REL=cpp_html
 CPP_HTML_DIR=$OUT/cpp_html
 
 LYX_VER=`$GET_VERSION_COMMAND 2>&1 | head -n1 | sed s/^LyX\ // | sed s/\ .*// | sed s/1svn/0/ | sed s/2svn/1/ | sed s/3svn/2/ | sed s/4svn/3/ | sed s/5svn/4/ | sed s/6svn/5/ | sed s/7svn/6/ | sed s/8svn/7/ | sed s/9svn/8/`
-BOILER_PLATE=`cd $SRC_DIR ; svn info 2>&1 | grep Revision`
+BOILER_PLATE=`cd $SRC_DIR ; svn info 2>&1 | grep Revision || git --no-pager log --max-count=1 | head -n1 | sed s/.*\ //g`
 
 tidy_keycode () {
 #sed 's/\\/\\\\/g' | 
@@ -217,6 +217,12 @@ make_one_bug () {
   g=$f.short
   #egrep '([Ii][Nn] .*[:[:alnum:]][:][0-9]*[^0-9]|#0 | signal SIG[^T]| ASSERTION .* VIOLATED IN )' -A9999  <$f >$g
   (egrep '([Ii][Nn] .*[:[:alnum:]][:][0-9]*[^0-9]|#0 | signal SIG[^T]| ASSERTION .* VIOLATED IN |:error:)' -A9999 | grep -v '^(gdb) (gdb)' | grep -v 'will be killed' | grep -v '^Quit anyway')  <$f >$g
+  if [ ! -e $g ]
+  then
+	CRITICAL $g does not exist. Perhaps we do not have rights to write to it?
+        full_exit
+        exit 1
+  fi
   if true
   then
 	IN_AT=`egrep -o '([Ii][Nn]|at) ([:lower:]* )?[:_[:alnum:]]*(::[:_[:alnum:]]*|:[0-9]*)' <$f | grep -v lyx_exit | grep -v [Aa]ssert | head -n 1  `
