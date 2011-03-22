@@ -9,7 +9,10 @@ QUALITY=85
 
 OUT_SUFFIX=html_out/$OUT_NAME/html
 OUT=$LT/$OUT_SUFFIX
-URL_OF_OUT=http://gmatht.homelinux.net/xp/keytest/$OUT_SUFFIX/
+KEYTEST_HTML_HOST=gmatht.homelinux.net
+KEYTEST_HTML_DIR=xp/keytest
+#URL_OF_OUT=http://gmatht.homelinux.net/xp/keytest/$OUT_SUFFIX/
+URL_OF_OUT=http://$KEYTEST_HTML_HOST/$KEYTEST_HTML_DIR/$OUT_SUFFIX/
 
 CPP_HTML_DIR_REL=cpp_html
 CPP_HTML_DIR=$OUT/cpp_html
@@ -104,7 +107,7 @@ report_bug_url () {
 
 search_bug_url () {
 	#http://www.lyx.org/trac/search?q=Foo%20bar
-	echo 'http://www.lyx.org/trac/search?q='`line2url "$TITLE"`
+	echo "$BUG_SEARCH_ENGINE"`line2url "$TITLE"`
 }
 
 gdb2html() {
