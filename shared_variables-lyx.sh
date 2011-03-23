@@ -5,12 +5,14 @@ get_tmp_dir () {
 
 DIRNAME0=`dirname "$0"`
 #OUT_NAME=out/branch_16_a/
-OUT_NAME=out/t15/
+OUT_NAME=out/t16/
 TMP_DIR=`get_tmp_dir $USER $OUT_NAME`
 LOG_FILE=$TMP_DIR/log
 ROOT_OUTDIR="$DIRNAME0/$OUT_NAME"
 WINDOWS_MANAGER="metacity"
 #export LD_LIBRARY_PATH=abiword/src/.libs
+
+EXE_TO_TEST_ARGS="-dbg any"
 
 EXE_NAME=lyx
 LYX_WINDOW_NAME=lyx
@@ -46,3 +48,4 @@ export MAKE_CMD='(make distclean ; make clean ; rm -r autom4te.cache ; rm acloca
 
 ##Used only by report_html
 BUG_SEARCH_ENGINE='http://www.lyx.org/trac/search?q='
+BUG_REPORT_ENGINE="http://www.lyx.org/trac/newticket?summary=%s&description=%s&version=%s"
