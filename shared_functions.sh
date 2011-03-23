@@ -255,6 +255,7 @@ run_gdb () {
   #shell kill $CHILD_PID
   #shell kill -9 $CHILD_PID
   (echo "
+  set width 999
   run $EXE_TO_TEST_ARGS 
   bt
   shell wmctrl -l
