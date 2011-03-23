@@ -98,8 +98,8 @@ report_bug_url () {
 			KEYWORDSTR="crash"
 		fi
 	fi
-	printf '%s' 'http://www.lyx.org/trac/newticket?summary='`line2url "$TITLE"`"&description=$DESC&version=$LYX_VER$KEYWORDSTR"
-	#echo 'http://www.lyx.org/trac/newticket?description='"$1"'&summary=foo%13oo&keywords=crash&version=1.6.
+	#printf '%s' 'http://www.lyx.org/trac/newticket?summary='`line2url "$TITLE"`"&description=$DESC&version=$LYX_VER$KEYWORDSTR"
+	printf "$BUG_REPORT_ENGINE" "$(line2url $TITLE)" "$DESC" "$LYX_VER$KEYWORDSTR"
 }
 
 search_bug_url () {

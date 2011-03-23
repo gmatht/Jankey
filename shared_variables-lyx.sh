@@ -45,3 +45,5 @@ export KEYTEST_HARDCODE=LYX
 export IS_BUILT_SUFFIX="_bin/share/lyx/chkconfig.ltx" 
 
 export MAKE_CMD='(make distclean ; make clean ; rm -r autom4te.cache ; rm aclocal.m4 ;  export PATH=/usr/lib/ccache/:/mnt/big/keytest/path/bin:$PATH && sed -i.bak s/0-[34]/0-5/ ./autogen.sh && ./autogen.sh && CXX=g++-4.2 CC=gcc-4.2 CXXFLAGS=-Os CFLAGS=-Os ./configure --enable-debug --prefix=`pwd`_bin && nice -19 make -j2 && nice -19 make install) | tee MAKE.LOG'
+
+export BUG_REPORT_ENGINE="http://www.lyx.org/trac/newticket?summary=%s&description=%s&version=%s"
