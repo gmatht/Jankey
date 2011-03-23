@@ -92,7 +92,7 @@ do
 done
 echo will build index.html
 (echo "<html>" 
-echo "<h1>List of bugs found</h1>"
+echo "<a href=\"$URL_OF_OUT\"><h1>List of bugs found</h1></a>"
 echo '<p>Please, do not "report" bugs without searching for them first. Also make sure to fill out the "To reproduce" section before pressing the "Create ticket" button</p>' 
 #FIXME: Sort messes up multiline entries.
 #sort -k 2 -t '>' < $OUT/indexreport.html 
@@ -106,4 +106,11 @@ if [ ! -z "$DISPLAY" ]
 then
 	#google-chrome $OUT/index.html && wmctrl -R '- Google Chrome'
 	google-chrome $OUT/index.html && wmctrl -R 'index.html'
+fi
+
+if [ -e "keytest_upload.rc" ]
+then
+	#This is not a webserver, so we'll have to upload the HTML files to our host
+	. ./keytest_upload.rc
+	rsync -ra --progress html_out/$OUT_NAME $KEYTEST_UPLOAD_AS_USER@$KEYTEST_HTML_HOST:/var/www/$KEYTEST_HTML_DIR/html_out/$OUT_NAME/
 fi

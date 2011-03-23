@@ -400,7 +400,7 @@ jobs
 interesting_crash () {
 echo interesting_crash $GDB , $KEYCODE , =  "$WANT_CRASH_ID" = `get_crash_id`
 (grep " signal SIG[^TK]" $GDB || grep KILL_FREEZE $KEYCODE || grep "Assert [*]" $GDB) &&
-   ( test -z "$WANT_CRASH_ID" || test "$WANT_CRASH_ID" = `get_crash_id` )
+   ( test -z "$WANT_CRASH_ID" || test "$REPRODUCE_ANY" = y || test "$WANT_CRASH_ID" = `get_crash_id` )
 }
 
 #get_pid() {
@@ -477,14 +477,15 @@ do_one_test() {
      echo -- if [ ! -z "$LYX_PID" ]
      if [ ! -z "$LYX_PID" ]
      then
-         echo NO LYX_PID $LYX_PID killing keytest.py
-	 kill `ps a | grep keytest.py | grep -v grep | cut -c 1-5`
+         #WHY would we ever want the two lines below. They should always break everything But I've been using them forever with no problems.
+         #echo NO LYX_PID $LYX_PID killing keytest.py
+	 #kill `ps a | grep keytest.py | grep -v grep | cut -c 1-5`
 	 sleep 0.2
 	 kill -9 `ps a | grep keytest.py | grep -v grep | cut -c 1-5`
 	#while ! wmctrl -r $LYX_WINDOW_NAME -b add,maximized_vert,maximized_horz
 	while ! $RAISE_WINDOW_CMD
 	do
-		echo trying to maximize lyx
+		echo trying to maximize lyx via "$RAISE_WINDOW_CMD" in dir `pwd`.
 		if ps -U $USER | grep $WINDOWS_MANAGER
 		then
 			echo at least the windows manager is running

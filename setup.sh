@@ -23,6 +23,8 @@ apt-get install xclip xvkbd wmctrl xvfb libqt4-dbg icewm || #svn pylint
 adduser keytest < /dev/null
 adduser keytest2 < /dev/null
 addgroup keytest2 keytest
+addgroup $SUDO_USER keytest
+addgroup $SUDO_USER keytest2
 
 if ! grep keytest /etc/sudoers
 then
