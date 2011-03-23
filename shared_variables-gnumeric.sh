@@ -54,5 +54,6 @@ export EXE_NAME
 #### fix below!!!
 export MAKE_CMD='(export PATH=/mnt/big/keytest/path/bin:$PATH; pwd; sed -i.bak "s/fgets.buf,10,stdin.;/buf[0]='\'y\'';/" src/af/util/unix/ut_unixAssert.cpp || true ; ./autogen.sh && ./configure --enable-debug --prefix=`pwd`_bin && nice -19 make -j2 && nice -19 make install) | tee MAKE.LOG'
 BUG_SEARCH_ENGINE="https://bugzilla.gnome.org/buglist.cgi?quicksearch="
+BUG_REPORT_ENGINE="https://bugzilla.gnome.org/enter_bug.cgi?product=Gnumeric&version=GIT&short_desc=%s&commment=%s&JUNK=%s"
 
 ## Stuff to install: libgtk2.0-0-dbg libglib2.0-dbg
