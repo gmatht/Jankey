@@ -228,7 +228,7 @@ make_one_bug () {
   fi
   if true
   then
-	IN_AT=`egrep -o '([Ii][Nn]|at) ([:lower:]* )?[:_[:alnum:]]*(::[:_[:alnum:]]*|:[0-9]*)' <$f | grep -v lyx_exit | grep -v [Aa]ssert | head -n 1  `
+	IN_AT=`egrep -o '([Ii][Nn]|at) ([[:lower:]]* )?[:_[:alnum:]]*(::[:_[:alnum:]]*|:[0-9]*)' <$f | grep -v lyx_exit | grep -v [Aa]ssert | head -n 1  `
 	SIGNAL=`grep -o ' signal SIG[[:alnum:]_]*[, ]' <$g | sed s/[^[:upper:]]//g | head -n 1`
 	TITLE="$SIGNAL $IN_AT"
 	if grep ' ASSERTION .* VIOLATED IN ' $g
