@@ -1,5 +1,11 @@
 . ./shared_variables.sh
 OUT=$ROOT_OUTDIR
+if [ "$1" = "-f" ]
+then
+  FORCE=yes
+  shift
+fi
+
 for g in "$@"
 do
 if echo "$g" | grep -s '^file://'
@@ -8,7 +14,13 @@ then
 else
 	f="$g"
 fi
+f=`echo "$f" | sed s,^file://,, |  sed s/html$/KEYCODEpure/g | sed s,^http://.*/keytest/,,`
 echo file_ $f
+if [ "$FORCE" = yes ]
+then 
+	rm -f $f.replay.bak
+	mv $f.replay $f.replay.bak
+fi
 if [ ! -e $f.replay ]
 then
 	echo replaying $f for screenshot
