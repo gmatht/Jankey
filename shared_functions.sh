@@ -763,7 +763,7 @@ then
 	mkdirp $REPLAYFILE.replay/ #|| (echo Cannot make directory $REPLAYFILE.replay/ ; full_exit )
 	if [ ! -d $REPLAYFILE.replay/ ]
 	then
-		echo Cannot make directory $REPLAYFILE.replay/
+		CRITICAL Cannot make directory $REPLAYFILE.replay/
 		full_exit
 	fi
 	export KEYTEST_INFILE=$REPLAYFILE
