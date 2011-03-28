@@ -107,7 +107,7 @@ report_bug_url () {
 
 search_bug_url () {
 	#http://www.lyx.org/trac/search?q=Foo%20bar
-	echo "$BUG_SEARCH_ENGINE"`line2url "$TITLE" | sed 's/:[0-9]*//g' `
+	echo "$BUG_SEARCH_ENGINE"`line2url "$TITLE" | sed 's/:[0-9][0-9]*//g' `
 }
 
 gdb2html() {
