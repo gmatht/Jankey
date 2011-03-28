@@ -83,10 +83,16 @@ text2url() {
 }
 
 report_bug_url () {
+	#Examples of URLs used to report a bug
+        #https://bugzilla.gnome.org/enter_bug.cgi?product=Gnumeric&version=GIT&comment=Description&short_desc=summary
 	#http://www.lyx.org/trac/newticket?description=bar%0Abar2&summary=foo%13oo&keywords=crash&version=1.6.5
  	#http://www.lyx.org/trac/newticket?summary=foo%13oo&description=bar%0Abar2&version=1.6.5&keywords=crash
+
 	#ver=`echo $3 | sed s/1svn/0/ | sed s/2svn/1/ | sed s/3svn/2/ | sed s/4svn/3/ | sed s/5svn/4/ | sed s/6svn/5/ | sed s/7svn/6/ | sed s/8svn/7/ | sed s/9svn/8/`
 	#echo 'http://www.lyx.org/trac/newticket?summary='`line2url "$1"`'&description='`text2url "$2"`'&version='"$LYX_VER"'&keywords=crash'
+
+	if 
+
 	DESC=`get_description | text2url`
 	#DESC=`text2url "$DESC"`
 	if echo $DESC | grep SIGSEGV > /dev/null
@@ -223,12 +229,16 @@ make_one_bug () {
   if [ ! -e $g ]
   then
 	CRITICAL $g does not exist. Perhaps we do not have rights to write to it?
-        full_exit
-        exit 1
+	full_exit
+	exit 1
   fi
   if true
   then
 	IN_AT=`egrep -o '([Ii][Nn]|at) ([[:lower:]]* )?[:_[:alnum:]]*(::[:_[:alnum:]]*|:[0-9]*)' <$f | grep -v lyx_exit | grep -v [Aa]ssert | head -n 1  `
+	if [ -z "$IN_AT" ]
+	then
+		IN_AT=`egrep -o '(In|IN|in|at) [[:alnum:]].*' <$f | head -n1`
+	fi
 	SIGNAL=`grep -o ' signal SIG[[:alnum:]_]*[, ]' <$g | sed s/[^[:upper:]]//g | head -n 1`
 	TITLE="$SIGNAL $IN_AT"
 	if grep ' ASSERTION .* VIOLATED IN ' $g

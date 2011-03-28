@@ -205,7 +205,7 @@ class CommandSourceFromFile(CommandSource):
 		a = array.array('l')
 	        for idx, l in enumerate(self.lines):
                 	if l.find(to_remove) > -1:
-                        	a.append(idx)
+                        	.append(idx)
 
 		print "ioA ", a
 
@@ -347,9 +347,9 @@ def sendKeystring(keystr, LYX_PID):
             time.sleep(0.01)
             print '.',
         print 'Making Screenshot: ' + screenshot_out + ' OF ' + infilename
-        time.sleep(0.2)
+        #time.sleep(0.2)
         os.system('import -window root '+screenshot_out+str(x.count)+".png")
-        time.sleep(0.1)
+        #time.sleep(0.1)
     sys.stdout.flush()
     if (subprocess.call(
             ["xvkbd", "-xsendevent", "-delay", DELAY, "-text", keystr],
