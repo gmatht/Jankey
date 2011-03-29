@@ -205,7 +205,7 @@ class CommandSourceFromFile(CommandSource):
 		a = array.array('l')
 	        for idx, l in enumerate(self.lines):
                 	if l.find(to_remove) > -1:
-                        	.append(idx)
+                        	a.append(idx)
 
 		print "ioA ", a
 
