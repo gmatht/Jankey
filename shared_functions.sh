@@ -702,6 +702,8 @@ done
 sanity_checks () {
 
  mkdirp "$TMP_DIR" 
+ chgrp keytest tmpfs/CRITICAL || true
+ chmod g+w keytest tmpfs/CRITICAL || true
 
  if [ ! -e "$EXE_TO_TEST" ]
  then
