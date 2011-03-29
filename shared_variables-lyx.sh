@@ -12,7 +12,7 @@ ROOT_OUTDIR="$DIRNAME0/$OUT_NAME"
 WINDOWS_MANAGER="metacity"
 #export LD_LIBRARY_PATH=abiword/src/.libs
 
-EXE_TO_TEST_ARGS="-dbg any"
+#EXE_TO_TEST_ARGS="-dbg any"
 
 EXE_NAME=lyx
 LYX_WINDOW_NAME=lyx

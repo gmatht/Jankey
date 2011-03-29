@@ -5,6 +5,22 @@ then
   OUT_NAME=out/$1
 fi
 
+log_crit() {
+NOW_SECS=`date +%s`
+CRIT_SECS="$1"
+if [ "$(($CRIT_SECS+600))" -gt $NOW_SECS ]
+then
+	shift
+	echo !!!!!!!!!!
+	echo CRITICAL -$(($NOW_SECS-$CRIT_SECS))  "$@"
+	echo !!!!!!!!!!
+	echo 
+fi
+}
+
+log_crit `tail -n 1 tmpfs/CRITICAL`
+
+
 TMP_DIR=`get_tmp_dir keytest $OUT_NAME`
 
 echo TMP_DIR $TMP_DIR
@@ -70,13 +86,13 @@ echo $LATEST_FILE | (
  )
 )
 
-
 false && tail -n 10000 $LOG_FILE | grep -F "autolyx:
 Trace
 reproduced
 X_PID
 x-session" | grep -v kill | grep -v Terminated | tail -n 9
 #exitTEST_FILE/$SEC.GDB
+#echo `date +%F:%k-%M-%S` `tail -n 1 tmpfs/CRITICAL`
 echo autolyx crashes ---------
 tail -n 10000 $LOG_FILE | grep autolyx: | grep -v kill | grep -v Terminated | grep -v grep #-A 5
 echo python crashes ---------

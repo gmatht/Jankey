@@ -21,8 +21,10 @@ mkdirp () {
 } 
 
 CRITICAL() {
-	echo "$@" 1>&2
-	echo "$@" >> tmpfs/CRITICAL
+	%DATE=`date +%F:%k-%M-%S`
+	DATE=`date +%s`
+	echo $DATE "$@" 1>&2
+	echo $DATE "$@" >> tmpfs/CRITICAL
         sleep 5
 }
 
@@ -135,8 +137,8 @@ fi
 if lpq
 then
  
-	echo We can print, this is bad!
-	echo use lpadmin to stop keytest from destroying a forest.
+	CRITICAL "We can print, this is bad!
+lpadmin to stop keytest from destroying a forest."
 	full_exit
 	sleep 999999 ; read
 else
@@ -647,7 +649,7 @@ do_one_test() {
 test_exist () {
 	if [ ! -e "$1" ]
 	then    
-	        echo "$1" does not exist! 1>&2
+	        CRITICAL "$1" does not exist! 1>&2
 		full_exit 1
 	fi
 }
@@ -655,7 +657,7 @@ test_exist () {
 assert () {
 	if ! "$@"
 	then 
-		echo "Assertion '$*' Failed!" 1>&2
+		CRITICAL "Assertion '$*' Failed!" 1>&2
 		full_exit 1
 	fi
 }
@@ -703,16 +705,16 @@ sanity_checks () {
 
  if [ ! -e "$EXE_TO_TEST" ]
  then
-	echo EXE_TO_TEST "$EXE_TO_TEST" does not exist C
-	echo Cannot proceed
+	CRITICAL EXE_TO_TEST "$EXE_TO_TEST" does not exist C
+	#echo Cannot proceed
 	exit 1
  fi
 
  TMPFS_USED=`df tmpfs/ | grep -o ...% | sed s/[^[:digit:]]//g | grep .`
  if [ "$TMPFS_USED" -gt 95 ]
  then
-	echo "More than 95% ($TMPFS_USED%) of tmpfs/ is used"
-	echo "Not much point starting... will abort"
+	CRITICAL "More than 95% ($TMPFS_USED%) of tmpfs/ is used"
+	#echo "Not much point starting... will abort"
 	exit 1
  fi
 
@@ -732,7 +734,7 @@ sanity_checks () {
 
  if ! test -z "`pylint -e $DIRNAME0/keytest.py`" 
  then
-	echo  "$DIRNAME0/keytest.py" has python errors
+	CRITICAL "$DIRNAME0/keytest.py" has python errors
 	exit
  fi
 }
@@ -763,7 +765,7 @@ then
 	mkdirp $REPLAYFILE.replay/ #|| (echo Cannot make directory $REPLAYFILE.replay/ ; full_exit )
 	if [ ! -d $REPLAYFILE.replay/ ]
 	then
-		echo Cannot make directory $REPLAYFILE.replay/
+		CRITICAL Cannot make directory $REPLAYFILE.replay/
 		full_exit
 	fi
 	export KEYTEST_INFILE=$REPLAYFILE

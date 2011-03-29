@@ -111,7 +111,7 @@ report_bug_url () {
 
 search_bug_url () {
 	#http://www.lyx.org/trac/search?q=Foo%20bar
-	echo "$BUG_SEARCH_ENGINE"`line2url "$TITLE"`
+	echo "$BUG_SEARCH_ENGINE"`line2url "$TITLE" | sed 's/:[0-9][0-9]*//g' `
 }
 
 gdb2html() {
@@ -232,7 +232,7 @@ make_one_bug () {
   fi
   if true
   then
-	IN_AT=`egrep -o '([Ii][Nn]|at) ([:lower:]* )?[:_[:alnum:]]*(::[:_[:alnum:]]*|:[0-9]*)' <$f | grep -v lyx_exit | grep -v [Aa]ssert | head -n 1  `
+	IN_AT=`egrep -o '([Ii][Nn]|at) ([[:lower:]]* )?[:_[:alnum:]]*(::[:_[:alnum:]]*|:[0-9]*)' <$f | grep -v lyx_exit | grep -v [Aa]ssert | head -n 1  `
 	if [ -z "$IN_AT" ]
 	then
 		IN_AT=`egrep -o '(In|IN|in|at) [[:alnum:]].*' <$f | head -n1`
