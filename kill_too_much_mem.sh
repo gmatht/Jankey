@@ -3,9 +3,11 @@ MAX_RSS=164000
 handle_ps_line () {
 	RSS="$6"
 	pyPID="$2"
+        #echo $@
+	echo if [ $RSS -gt $MAX_RSS ] 
 	if [ $RSS -gt $MAX_RSS ] 
 	then 
-		echo KILLING "$2" .. "$6"
+	#	echo KILLING "$2" .. "$6"
 		#kill -s XCPU "$2"
 		kill "$2"
 		sleep 1
@@ -16,10 +18,10 @@ handle_ps_line () {
 while true
 do
 
-ps u -u keytest  | grep python | while read l
+ps u -u keytest  | egrep '(python|firefox|gnome-help|yelp|evolution)' | while read l
 do
 	handle_ps_line $l
 done
-
+#echo don#e
 sleep 6
 done

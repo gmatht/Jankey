@@ -12,10 +12,13 @@
 D=8 #DISPLAY
 
 set -e
+set -x
 
 . /lib/lsb/init-functions
 
+
 KT=/mnt/big/keytest
+KT=`pwd` # HACK!
 TMPFS=$KT/tmpfs
 
 export TMPDIR=$TMPFS
@@ -43,7 +46,7 @@ stop () {
 	sleep 1
 	sudo -H -u keytest $KT/killtest.sh || true
 	#(cd /mnt/big/xp/images/share/Ubuntu904/keytest &&
-	(cd /mnt/big/keytest &&
+	(cd $KT &&
 
 		sudo -H -u keytest ./store_task_data.sh 
 	)
@@ -71,15 +74,15 @@ start () {
 	mount tmpfs $TMPFS -t tmpfs -o size=400m
  fi
 
- (cd /mnt/big/keytest
+ (cd $KT 
   OUT_NAME=`grep ^OUT_NAME= shared_variables.sh | sed s/^OUT_NAME=//`
   (find $OUT_NAME; find tmpfs/) | while read F
   do
-	chgrp keytest "$F"
-	chmod g+w "$F"
+	chgrp keytest "$F" || true
+	chmod g+w "$F" || true
   done 
   mkdir -p "$OUT_NAME"
-  chgrp keytest "$OUT_NAME"
+  chgrp keytest "$OUT_NAME" || true
   chmod g+w "$OUT_NAME"
   echo PWD `pwd`
   sudo -H -u keytest ./sanity_check.sh && (

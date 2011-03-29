@@ -1,7 +1,10 @@
 #!/bin/bash
 # attempt to reproduce an error from a KEYCODEpure file
 # NOTE: does not kill its children, may lead to hangs.
-KT=`dirname $0`
+if [ -z "$KT" ]
+then
+  export KT=`dirname $0`
+fi
 (cd $KT
 if [ ! -z "$2" ]
 then
