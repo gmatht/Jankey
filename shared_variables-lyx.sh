@@ -6,6 +6,7 @@ get_tmp_dir () {
 DIRNAME0=`dirname "$0"`
 #OUT_NAME=out/branch_16_a/
 OUT_NAME=out/t16/
+. ./local_keytest.rc
 TMP_DIR=`get_tmp_dir $USER $OUT_NAME`
 LOG_FILE=$TMP_DIR/log
 ROOT_OUTDIR="$DIRNAME0/$OUT_NAME"

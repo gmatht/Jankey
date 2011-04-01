@@ -92,6 +92,7 @@ do
 done
 echo will build index.html
 (echo "<html>" 
+echo "<title>Keytest_Report</title>"
 echo "<a href=\"$URL_OF_OUT\"><h1>List of bugs found</h1></a>"
 echo '<p>Please, do not "report" bugs without searching for them first. Also make sure to fill out the "To reproduce" section before pressing the "Create ticket" button</p>' 
 #FIXME: Sort messes up multiline entries.
@@ -101,11 +102,17 @@ cat < $OUT/indexreport.html ) >> $OUT/index.html
 echo built index.html
 
 #firefox $OUT/indexreport.html
+
+if [ -z $BROWSER ]
+then
+	BROWSER=`which firefox google-chrome opera epiphany xdg-open | head -n1` #Could perhaps adjust order
+fi
+
 echo $URL_OF_OUT/indexreport.html
 if [ ! -z "$DISPLAY" ]
 then
 	#google-chrome $OUT/index.html && wmctrl -R '- Google Chrome'
-	google-chrome $OUT/index.html && wmctrl -R 'index.html'
+	$BROWSER file://`pwd`/$OUT/index.html && wmctrl -R 'Keytest_Report'
 fi
 
 if [ -e "keytest_upload.rc" ]
