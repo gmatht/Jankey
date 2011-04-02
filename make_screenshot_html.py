@@ -39,7 +39,10 @@ for f in os.listdir(wdir):
 
 keycodes = ['', 'KK: \Afn']
 keycodes.extend(open(wdir + '/' + sec + '.KEYCODEpure'))
-keycodes.extend(open(wdir + '/' + sec + '.KEYCODEpure+'))
+try:
+    keycodes.extend(open(wdir + '/' + sec + '.KEYCODEpure+'))
+except:
+    print "Cannot read the KEYCODEpure+ overflow file, this probably just means that there was no overflow, which is fine.\n"
 
 
 def Highlight_Keycode_i(keycodes, i):
