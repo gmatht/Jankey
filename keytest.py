@@ -124,7 +124,10 @@ class CommandSource:
             for k in range(1, 2):
                 keystr = keystr + self.keycode[random.randint(1,
                         len(self.keycode)) - 1]
-            return 'KK: ' + keystr
+            if random.uniform(0, 1) < 0.5:
+                return 'KK: ' + keystr
+            else:
+                return 'KO: ' + keystr
 
 # This is a back-of-the-envolope job designed to get the 
 # proportion of keycodes dropped to adapt to an optimal value
@@ -325,7 +328,7 @@ def kill_lyx():
 
     os._exit(1)
 
-def sendKeystring(keystr, LYX_PID):
+def sendKeystring(keystr, LYX_PID, opt="-xsendevent"):
 
     # print "sending keystring "+keystr+"\n"
 
@@ -352,12 +355,13 @@ def sendKeystring(keystr, LYX_PID):
         #time.sleep(0.1)
     sys.stdout.flush()
     if (subprocess.call(
-            ["xvkbd", "-xsendevent", "-delay", DELAY, "-text", keystr],
+            ["xvkbd", opt, "-delay", DELAY, "-text", keystr],
             stdout=FNULL,stderr=FNULL
             ) == 0):
         sys.stdout.write('*')
     else:
         sys.stdout.write('X')
+    subprocess.call(["echo","xvkbd", opt, "-delay", DELAY, "-text", keystr])
 
 def system_retry(num_retry, cmd):
     i = 0
@@ -448,9 +452,15 @@ while True:
         RaiseWindow()
     elif c[0:4] == 'Ra: ':
         os.system('wmctrl -R "' + c[4:] + '"')
-    elif c[0:4] == 'KK: ':
+    elif c[0:4] == 'KK: ' or c[0:4] == 'KO: ':
         if os.path.exists('/proc/' + lyx_pid + '/status'):
-            sendKeystring(c[4:], lyx_pid)
+	    if c[0:2] == 'KO':
+                # "-compcact" has no effect, we use it as an easy way to avoid
+                # sending -xsendevent. -xsentevent sometimes stops a new dialog
+                # from being raised which may or may not be what we want.
+                sendKeystring(c[4:], lyx_pid, opt="-compact")
+            else:
+                sendKeystring(c[4:], lyx_pid)
         else:
             ##os.system('killall lyx; sleep 2 ; killall -9 lyx')
             print 'No path /proc/' + lyx_pid + '/status, exiting'
