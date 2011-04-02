@@ -127,10 +127,10 @@ echo DISPLAY=:$D LYX_NO_BACKTRACE_HELPER="y" sudo -H -u "$BISECT_AS_USER" ./make
 DISPLAY=:$D LYX_NO_BACKTRACE_HELPER="y" sudo -H -u "$BISECT_AS_USER" ./make_screen_shots.sh $TEST_FILE
 ) #2>&1 | tee $KEYCODEpure.full_bisect_log
 
-echo mkdir -p out/cache-bisect/store
-mkdir -p out/cache-bisect/store
-echo cp /tmp/cache-bisect.xp.log  out/cache-bisect/store/`basename "$TEST_FILE"`
-cp /tmp/cache-bisect.xp.log  out/cache-bisect/store/`basename "$TEST_FILE"`
+#echo mkdir -p out/cache-bisect/store
+#mkdir -p out/cache-bisect/store
+#echo cp /tmp/cache-bisect.xp.log  out/cache-bisect/store/`basename "$TEST_FILE"`
+#cp /tmp/cache-bisect.xp.log  out/cache-bisect/store/`basename "$TEST_FILE"`
 
 echo -----
 tail tmpfs/CRITICAL
