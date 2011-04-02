@@ -2,6 +2,8 @@ DIRNAME0=`dirname "$0"`
 #ROOT_OUTDIR="$DIRNAME0/out"
 #OUTDIR="$ROOT_OUTDIR"
 
+# I am depreciating BORED_AFTER_SECS and BOREDOM variables. They should prbably be removed.
+
 OUTDIR="$TMP_DIR"
 STATUS_FILE="$TMP_DIR"/log.status
 #OUTDIR="$DIRNAME0/out"
@@ -101,6 +103,12 @@ fi
 if [ -z $BORED_AFTER_SECS ]
 then
 	BORED_AFTER_SECS=7200 #If we have spent more than 3600 secs (an hour) replaying a file, without learning anything new, go and start looking for more bugs instead
+fi
+
+
+if [ -z $BORED_AFTER_COUNT ]
+then
+	BORED_AFTER_COUNT=100 #If we have attempted to eliminate KEYCODES 100 times and have failed, maybe we should give up?
 fi
 
 LAST_CORE=""
@@ -846,6 +854,7 @@ fi
 echo TTL $TAIL_LINES
 
 LAST_EVENT=`date +%s` # Last time something interesting happened. If nothing interesting has happened for a while, we should quit.
+BOREDOM_COUNT=0
 
 rm $LOG_FILE
 
@@ -880,8 +889,10 @@ do
    if [ ! -z "$REPLAYFILE" ] # We are replaying a KEYCODEpure file
    then
 	BOREDOM=$(($SEC-$LAST_EVENT))
-	echo Boredom factor: $SEC-$LAST_EVENT'=' BOREDOM=$BOREDOM
-	if [ $BOREDOM -gt $BORED_AFTER_SECS -o -e $OUTDIR/STOP ]
+	BOREDOM_COUNT=$(($BOREDOM_COUNT+1))
+	echo Boredom factor: $SEC-$LAST_EVENT'=' BOREDOM=$BOREDOM, BORDOM_COUNT=$BOREDOM_COUNT
+	#if [ $BOREDOM -gt $BORED_AFTER_SECS -o -e $OUTDIR/STOP ]
+	if [ $BOREDOM_COUNT -gt $BORED_AFTER_CYCLES -o -e $OUTDIR/STOP ]
 	then
 		echo
 		echo Is is now $SEC seconds
