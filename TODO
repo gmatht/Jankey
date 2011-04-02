@@ -26,15 +26,18 @@ Automatically update from svn every 24 hours, recheck if bugs have been fixed.
 Automatically add bisect to bug report.
 Add a GUI
 Try eliminating each keycode in turn.
-  Try removing alt, shift and ctrl modifiers from key presses.
 Do performance regression testing
 fuzz test inputs and outputs as well.
 use ulimit -u to protect against fork bombs.
+
+Pause when memory pressure high.
+After eliminating keycodes, remove restriction that backtrace has to match original and see if we can eliminate more keycodes.
 
 Integrate SIKULI: http://groups.csail.mit.edu/uid/sikuli/
 
 DONE:
 
+Try removing alt, shift (but not ctrl) modifiers from key presses.
 semi protect home dir for repeatibility.
 HTML out with links.
 Move all temporary files to a single dir which can be mounted as a tmpfs to reduce HDD writes 
