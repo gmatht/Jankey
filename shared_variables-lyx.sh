@@ -6,7 +6,7 @@ get_tmp_dir () {
 DIRNAME0=`dirname "$0"`
 #OUT_NAME=out/branch_16_a/
 OUT_NAME=out/t16/
-. ./local_keytest.rc
+. $DIRNAME0/local_keytest.rc
 TMP_DIR=`get_tmp_dir $USER $OUT_NAME`
 LOG_FILE=$TMP_DIR/log
 ROOT_OUTDIR="$DIRNAME0/$OUT_NAME"
@@ -17,7 +17,8 @@ WINDOWS_MANAGER="metacity"
 
 EXE_NAME=lyx
 LYX_WINDOW_NAME=lyx
-export RAISE_WINDOW_CMD="./focus -R $LYX_WINDOW_NAME"
+#export RAISE_WINDOW_CMD="./focus -R $LYX_WINDOW_NAME"
+export RAISE_WINDOW_CMD="wmctrl -R $LYX_WINDOW_NAME"
 if [ -z $SRC_DIR ]
 then
 	SRC_DIR=lyx/src
