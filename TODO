@@ -31,12 +31,12 @@ fuzz test inputs and outputs as well.
 use ulimit -u to protect against fork bombs.
 
 Pause when memory pressure high.
-After eliminating keycodes, remove restriction that backtrace has to match original and see if we can eliminate more keycodes.
 
 Integrate SIKULI: http://groups.csail.mit.edu/uid/sikuli/
 
 DONE:
 
+After eliminating keycodes, remove restriction that backtrace has to match original and see if we can eliminate more keycodes.
 Try removing alt, shift (but not ctrl) modifiers from key presses.
 semi protect home dir for repeatibility.
 HTML out with links.

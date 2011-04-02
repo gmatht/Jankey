@@ -901,6 +901,11 @@ do
 			echo "Too many keycodes, not making screenshots."
 		fi
 		store_result final
+		if ! test -z "$WANT_CRASH_ID"
+		then
+			echo Attempting to eliminate more keycodes by Not Checking Crash Id
+			cp $OUTDIR/$SEC.KEYCODEpure $ROOT_OUTDIR/toreplay/$OUTDIR/${SEC}_ncci.KEYCODEpure
+		fi
 		full_exit
 	fi
    else
