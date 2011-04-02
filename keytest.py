@@ -332,9 +332,10 @@ def sendKeystring(keystr, LYX_PID, opt="-xsendevent"):
 
     # print "sending keystring "+keystr+"\n"
 
-    if not re.match(".*\w.*", keystr):
-        print 'print .' + keystr + '.\n'
-        keystr = 'a'
+    #This should not be required anymore as subprocess.call should handle weird characters properly
+    #if not re.match(".*\w.*", keystr):
+    #    print 'print .' + keystr + '.\n'
+    #    keystr = '\\' + keystr
     before_secs = time.time()
     while not lyx_sleeping():
         time.sleep(0.01)
