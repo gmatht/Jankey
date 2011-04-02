@@ -88,7 +88,7 @@ start () {
   sudo -H -u keytest ./sanity_check.sh && (
   #sudo -H -u keytest nice -19 nohup bash ./initXvfb 1 bash ./main.sh >> /dev/null & 
 	echo STARTING
-	ps gaux | grep kill_too_much_mem || ( ./kill_too_much_mem.sh & )
+	ps gaux | grep -v grep | grep kill_too_much_mem || ( ./kill_too_much_mem.sh & )
 	killall cyclelog.sh || true
   	(sudo -H -u keytest nice -19 ionice -c 3 nohup bash ./initXvfb 8 bash ./main.sh | ./cyclelog.sh tmpfs/nohup.log) 2> /dev/null > /devnull &
   	#sudo -H -u keytest nice -19 ionice -c 3 nohup bash ./initXvfb 8 bash ./main.sh > tmpfs/nohup.log &

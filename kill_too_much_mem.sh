@@ -3,8 +3,6 @@ MAX_RSS=164000
 handle_ps_line () {
 	RSS="$6"
 	pyPID="$2"
-        #echo $@
-	echo if [ $RSS -gt $MAX_RSS ] 
 	if [ $RSS -gt $MAX_RSS ] 
 	then 
 	#	echo KILLING "$2" .. "$6"
