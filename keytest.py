@@ -362,7 +362,6 @@ def sendKeystring(keystr, LYX_PID, opt="-xsendevent"):
         sys.stdout.write('*')
     else:
         sys.stdout.write('X')
-    subprocess.call(["echo","xvkbd", opt, "-delay", DELAY, "-text", keystr])
 
 def system_retry(num_retry, cmd):
     i = 0
