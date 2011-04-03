@@ -872,6 +872,7 @@ while true
 do
 #(
  echo Currently running autolyx PID=$$
+ BOREDOM_COUNT=$(($BOREDOM_COUNT+1))
  if [ ! -z "$TAIL_LINES" ] 
  then
   echo TAIL_LINES: "$TAIL_LINES"
@@ -889,9 +890,11 @@ do
    if [ ! -z "$REPLAYFILE" ] # We are replaying a KEYCODEpure file
    then
 	BOREDOM=$(($SEC-$LAST_EVENT))
-	BOREDOM_COUNT=$(($BOREDOM_COUNT+1))
+	echo BORDOM_COUNT=$BOREDOM_COUNT
 	echo Boredom factor: $SEC-$LAST_EVENT'=' BOREDOM=$BOREDOM, BORDOM_COUNT=$BOREDOM_COUNT
 	#if [ $BOREDOM -gt $BORED_AFTER_SECS -o -e $OUTDIR/STOP ]
+	pwd
+	echo -- if [ $BOREDOM_COUNT -gt $BORED_AFTER_CYCLES -o -e $OUTDIR/STOP ]
 	if [ $BOREDOM_COUNT -gt $BORED_AFTER_CYCLES -o -e $OUTDIR/STOP ]
 	then
 		echo
