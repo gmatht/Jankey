@@ -69,10 +69,16 @@ start () {
  done
  if ! mount | grep `readlink -f $TMPFS`
  then
-
 	echo mount tmpfs $TMPFS tmpfs -o size=400m
 	mount tmpfs $TMPFS -t tmpfs -o size=400m
  fi
+  
+ echo making tmpfs/CRITICAL as $USER !!!!!!!!
+ touch tmpfs/CRITICAL
+ chown keytest tmpfs/CRITICAL
+ chgrp keytest tmpfs/CRITICAL
+ chmod g+rwx tmpfs/CRITICAL
+ echo DONE
 
  (cd $KT 
   OUT_NAME=`grep ^OUT_NAME= shared_variables.sh | sed s/^OUT_NAME=//`
