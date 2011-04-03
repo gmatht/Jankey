@@ -29,9 +29,10 @@ OUT="$TMP_DIR"
 LOG_FILE=tmpfs/nohup.log
 NOW_SEC=`date +%s`
 LATEST_FILE=`ls $OUT/* $ROOT_OUTDIR/toreproduce/* $ROOT_OUTDIR/toreplay/* $ROOT_OUTDIR/toreproduce/replayed/* $ROOT_OUTDIR/toreplay/* -td -1 | egrep -v '(log|list_of_sizes.txt|kt.dir)'  | head -n1 `
-LATEST_SEC=`basename $LATEST_FILE | sed s/[.].*//`
+#LATEST_SEC=`basename $LATEST_FILE | sed s/[.].*//`
+LATEST_SEC=`date +%s -r $LATEST_FILE`
 AGE=$(($NOW_SEC-$LATEST_SEC))
-echo NOW_SEC $NOW_SEC \(AGE: $AGE\)
+echo NOW_SEC $NOW_SEC vs $LATEST_SEC \(AGE: $AGE\)
 echo recently modified files:
 echo LATEST_FILE="ls $OUT/* $ROOT_OUTDIR/toreproduce/* $ROOT_OUTDIR/toreplay/* $ROOT_OUTDIR/toreproduce/replayed/* $ROOT_OUTDIR/toreplay/* -td -1 | grep -v log  | head -n1"
 echo $LATEST_FILE | (
