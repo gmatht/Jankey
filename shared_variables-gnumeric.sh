@@ -9,7 +9,8 @@ else
   DIRNAME0="$KT"
 fi
 #OUT_NAME=out/branch_16_a/
-OUT_NAME=out/gnumeric_2/
+. $DIRNAME0/local_keytest.rc
+OUT_NAME=out/gnumeric_$OUT_COUNT/
 #TMP_DIR=tmpfs/tmp-$USER/$OUT_NAME
 TMP_DIR=`get_tmp_dir $USER $OUT_NAME`
 LOG_FILE=$TMP_DIR/log
