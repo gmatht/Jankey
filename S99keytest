@@ -76,11 +76,13 @@ start () {
 
  (cd $KT 
   OUT_NAME=`grep ^OUT_NAME= shared_variables.sh | sed s/^OUT_NAME=//`
-  (find $OUT_NAME; find tmpfs/) | while read F
-  do
-	chgrp keytest "$F" || true
-	chmod g+w "$F" || true
-  done 
+  sudo -H -u keytest ./setup_out_dir.sh
+  #The following may be overkill, now use the above instead
+  #(find $OUT_NAME; find tmpfs/) | while read F
+  #do
+	#chgrp keytest "$F" || true
+	#chmod g+w "$F" || true
+  #done 
   mkdir -p "$OUT_NAME"
   chgrp keytest "$OUT_NAME" || true
   chmod g+w "$OUT_NAME"
