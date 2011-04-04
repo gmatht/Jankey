@@ -106,9 +106,9 @@ then
 fi
 
 
-if [ -z $BORED_AFTER_COUNT ]
+if [ -z $BORED_AFTER_CYCLES ]
 then
-	BORED_AFTER_COUNT=100 #If we have attempted to eliminate KEYCODES 100 times and have failed, maybe we should give up?
+	BORED_AFTER_CYCLES=100 #If we have attempted to eliminate KEYCODES 100 times and have failed, maybe we should give up?
 fi
 
 LAST_CORE=""
