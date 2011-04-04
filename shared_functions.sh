@@ -63,6 +63,7 @@ kill_all_children() {
 }
 
 store_result() {
+echo store_result "$@"
 if [ -z "$NO_STORE_RESULT" ]
 then
 	#move result to permanent storage
@@ -432,6 +433,7 @@ absname () {
 
 
 do_one_test() {
+  echo SEC $SEC
   GDB=$OUTDIR/$SEC.GDB
   KEYCODE=$OUTDIR/$SEC.KEYCODE
   KEYCODEpure=$OUTDIR/$SEC.KEYCODEpure
