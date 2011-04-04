@@ -7,6 +7,11 @@ DIRNAME0=`dirname "$0"`
 
 OUT_N=$(echo $OUT_NAME | sed s,/$,,)
 
+if [ -e $OUT_N ]
+then
+	exit 0
+fi
+
 mkshareddir() {
 	for d in "$@"
 	do
@@ -16,12 +21,10 @@ mkshareddir() {
 	done
 }
 
-
-
 TT=$OUT_N.tmp
 
 mkdir -p $TT
-for r in final initial reproducible tasks tasks_done toreplay toreproduce
+for r in final initial reproducible tasks tasks_done toreplay toreproduce toreplay/replayed toreproduce/replayed
 do
 	mkshareddir $TT/$r
 done
