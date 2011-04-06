@@ -31,14 +31,21 @@ do
 		f=$keycode_file.replay/last_crash_sec
         	keycode_file=$(echo $f | sed s/last_crash_sec/$(cat $f).KEYCODEpure/)
 	fi
-        echo $keycode_file
+        if [ -e `echo $keycode_file | sed s/KEYCODEpure/GDB/` ] # hack to stop other bug causing crash
+	then
+	true #        echo $keycode_file
+	fi
 done
 }
 
 list_keycode_files () {
 for f in  $OUT_NAME/final/*.KEYCODEpure
 do
-	echo $f
+	#echo $f
+        if [ -e `echo $f | sed s/KEYCODEpure/GDB/` ] # hack to stop other bug causing crash
+	then
+	        echo $f
+	fi
 done
 }
 
