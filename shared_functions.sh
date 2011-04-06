@@ -63,6 +63,7 @@ kill_all_children() {
 }
 
 store_result() {
+echo store_result "$@"
 if [ -z "$NO_STORE_RESULT" ]
 then
 	#move result to permanent storage
@@ -408,9 +409,10 @@ jobs
 }
 
 # *** glibc detected *** /mnt/big/keytest/lyx/src/lyx: double free or corruption (!prev): 0x0000000005c34ed0 ***
+# Traceback (most recent call last):
 interesting_crash () {
 echo interesting_crash $GDB , $KEYCODE , =  "$WANT_CRASH_ID" = `get_crash_id`
-(grep " signal SIG[^TK]" $GDB || grep KILL_FREEZE $KEYCODE || grep "Assert [*]" $GDB || grep "[*].glibc.detected.[*]" $GDB) &&
+(grep '\( signal SIG[^TK]\|Assert [*]\|.-CRITICAL\|Traceback .most recent call last.:\)' $GDB || grep KILL_FREEZE $KEYCODE) &&
    ( test -z "$WANT_CRASH_ID" || test "$REPRODUCE_ANY" = y || test "$WANT_CRASH_ID" = `get_crash_id` )
 }
 
@@ -433,6 +435,7 @@ absname () {
 
 
 do_one_test() {
+  echo SEC $SEC
   GDB=$OUTDIR/$SEC.GDB
   KEYCODE=$OUTDIR/$SEC.KEYCODE
   KEYCODEpure=$OUTDIR/$SEC.KEYCODEpure

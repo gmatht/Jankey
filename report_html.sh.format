@@ -231,8 +231,7 @@ make_one_bug () {
   (egrep '([Ii][Nn] .*[:[:alnum:]][:][0-9]*[^0-9]|#0 | signal SIG[^T]| ASSERTION .* VIOLATED IN |:error:)' -A9999 | grep -v '^(gdb) (gdb)' | grep -v 'will be killed' | sed 's/^[(]gdb[)] //' | grep -v '^Quit anyway')  <$f >$g
   if [ ! -e $g ]
   then
-	CRITICAL $g does not exist. Perhaps we do not have rights to write to it?
-	full_exit
+	echo CRITICAL $g does not exist. Perhaps we do not have rights to write to it?
 	exit 1
   fi
   if true
