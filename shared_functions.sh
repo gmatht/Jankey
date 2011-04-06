@@ -407,9 +407,10 @@ jobs
 
 }
 
+# *** glibc detected *** /mnt/big/keytest/lyx/src/lyx: double free or corruption (!prev): 0x0000000005c34ed0 ***
 interesting_crash () {
 echo interesting_crash $GDB , $KEYCODE , =  "$WANT_CRASH_ID" = `get_crash_id`
-(grep " signal SIG[^TK]" $GDB || grep KILL_FREEZE $KEYCODE || grep "Assert [*]" $GDB) &&
+(grep " signal SIG[^TK]" $GDB || grep KILL_FREEZE $KEYCODE || grep "Assert [*]" $GDB || grep "[*].glibc.detected.[*]" $GDB) &&
    ( test -z "$WANT_CRASH_ID" || test "$REPRODUCE_ANY" = y || test "$WANT_CRASH_ID" = `get_crash_id` )
 }
 
