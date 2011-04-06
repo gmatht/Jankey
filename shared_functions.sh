@@ -408,9 +408,11 @@ jobs
 
 }
 
+#Perhaps I should replace these greps with a single egrep.
+# Traceback (most recent call last):
 interesting_crash () {
 echo interesting_crash $GDB , $KEYCODE , =  "$WANT_CRASH_ID" = `get_crash_id`
-(grep " signal SIG[^TK]" $GDB || grep KILL_FREEZE $KEYCODE || grep "Assert [*]" $GDB || grep .-CRITICAL $GDB) &&
+(grep " signal SIG[^TK]" $GDB || grep KILL_FREEZE $KEYCODE || grep "Assert [*]" $GDB || grep .-CRITICAL $GDB || grep "Traceback .most recent call last.:" $GDB ) &&
    ( test -z "$WANT_CRASH_ID" || test "$REPRODUCE_ANY" = y || test "$WANT_CRASH_ID" = `get_crash_id` )
 }
 
