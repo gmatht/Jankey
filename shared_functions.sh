@@ -178,10 +178,10 @@ extras_prepare () {
 get_crash_id () {
 if [ "$KEYTEST_HARDCODE" = LYX ]
 then
-  name=`(grep -o ' in lyx::[[:alnum:]:]*' < $GDB ; grep -o ' [ai][nt] [[:alnum:]:]*' < $GDB) |  grep -v -i assert | head -n4 | sed s/in// | sed 's/ //g'`
+  name=`(grep -o ' in lyx::[[:alnum:]:]*' < $GDB ; grep -o ' [ai][nt] [[:alnum:]:]*' < $GDB ; grep .-CRITICAL < $GDB ) |  grep -v -i assert | head -n4 | sed s/in// | sed 's/ //g'`
   echo $name | sed 's/ /__/g'
 else #remove this else as grep -o lyx is harmless?
-  name=`(grep -o ' in lyx::[[:alnum:]:]*' < $GDB ; grep -o ' [ai][nt] [[:alnum:]:]*' < $GDB) |  grep -v -i assert | head -n4 | sed s/in// | sed 's/ //g'`
+  name=`(grep -o ' in lyx::[[:alnum:]:]*' < $GDB ; grep -o ' [ai][nt] [[:alnum:]:]*' < $GDB ; grep .-CRITICAL < $GDB) |  grep -v -i assert | head -n4 | sed s/in// | sed 's/ //g'`
   echo $name | sed 's/ /__/g'
 fi
 
