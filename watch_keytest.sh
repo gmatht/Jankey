@@ -101,4 +101,5 @@ echo autolyx crashes ---------
 tail -n 10000 $LOG_FILE | grep autolyx: | grep -v kill | grep -v Terminated | grep -v grep #-A 5
 echo python crashes ---------
 tail -n 10000 $LOG_FILE | grep -i -a Trace -A 7 | tail -n8
+tail -n 4 $LOG_FILE
 #echo misc ----
