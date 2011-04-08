@@ -109,7 +109,7 @@ fi
 
 if [ -z $BORED_AFTER_CYCLES ]
 then
-	BORED_AFTER_CYCLES=100 #If we have attempted to eliminate KEYCODES 100 times and have failed, maybe we should give up?
+	BORED_AFTER_CYCLES=200 #If we have attempted to eliminate KEYCODES 100 times and have failed, maybe we should give up?
 fi
 
 LAST_CORE=""
@@ -583,6 +583,7 @@ do_one_test() {
     if [ ! -z "$TAIL_LINES" ]
     then
     	LAST_EVENT="$SEC"
+        BOREDOM_COUNT=0
 	echo Reproducible > $OUTDIR/Reproducible
 	store_result reproducible
     fi
@@ -606,6 +607,7 @@ do_one_test() {
 	if [ "$NUM_KEYCODES" != "$LAST_NUM_KEYCODES" ]
 	then
 		LAST_EVENT="$SEC"
+                BOREDOM_COUNT=0
 		LAST_NUM_KEYCODES=$NUM_KEYCODES
 		echo "Hooray! we have eleminated some keycodes"
 	fi
