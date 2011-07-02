@@ -200,7 +200,7 @@ class CommandSourceFromFile(CommandSource):
 
         # Now we start randomly dropping lines, which we hope are redundant
         # p is the probability that any given line will be removed
-	if random.uniform(0, 1) < 0.05:
+	if (os.path.getsize(filename) < 300 and random.uniform(0, 1) < 0.05):
 		if random.uniform(0, 1) < 0.5:
 			to_remove="\S"
 		else:	
@@ -351,9 +351,9 @@ def sendKeystring(keystr, LYX_PID, opt="-xsendevent"):
             time.sleep(0.01)
             print '.',
         print 'Making Screenshot: ' + screenshot_out + ' OF ' + infilename
-        #time.sleep(0.2)
+        time.sleep(0.02)
         os.system('import -window root '+screenshot_out+str(x.count)+".png")
-        #time.sleep(0.1)
+        time.sleep(0.01)
     sys.stdout.flush()
     if (subprocess.call(
             ["xvkbd", opt, "-delay", DELAY, "-text", keystr],
