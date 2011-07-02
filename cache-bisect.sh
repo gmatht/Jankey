@@ -1,13 +1,32 @@
 set -e
 
-count=$1
+if [ -z "$1" ]
+then 
+	echo "Usage $0 N_RETRIES RECIPE
 
+The parameter N_RETRIES must be an integer greater than 0
+representing the number of retries used when attempting to reproduce a bug.
+As a convienince you can omit N and it will default to 3.
 
-if echo $count | grep [^[:digit:]] > /dev/null
-then
-    echo The first parameter must be an integer greater than 0
-    echo representing the number of retries used when attempting to reproduce a bug
+RECIPE is a keycode can be a KEYCODEpure file. Since 
+the report_html interface is html, as a convienence you can enter
+RECIPE as a URL to a locally stored KEYCODEpure file, and 
+we will try to convert it to a local file name.
+"
+	exit 1
 fi
+
+case "$1" in
+*[^[:digit:]]*) count=3 ; echo N_RETRIES defaulting to $count ;;
+*) count="$1" ; shift ; echo N_RETRIES set to $countecho DIGIT ;;
+esac
+
+#| grep [^[:digit:]] > /dev/null
+#then
+#    echo The first parameter must be an integer greater than 0
+#    echo representing the number of retries used when attempting to reproduce a bug
+#    exit
+#fi
 
 if [ ! "$count" -gt 0 ]
 then
@@ -15,7 +34,6 @@ then
     echo representing the number of retries used when attempting to reproduce a bug
     exit 1
 fi
-shift
 
 pylint -e ./cache-bisect.py
 mkdir -p /var/cache/keytest/lyx-devel.cache/store/
@@ -45,6 +63,7 @@ TEST_FILE=`echo "$1" | sed s,^file://,, | sed 's/html$/KEYCODEpure/'`
 TEST_FILE=`echo "$TEST_FILE" | sed s,^http://.*/keytest/,,`
 TEST_FILE=`absname "$TEST_FILE"`
 
+set | grep  TEST_FILE=
 #grep '^-' $VERS -lt 0 ]
 
 
