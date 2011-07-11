@@ -7,6 +7,10 @@ then
 	exit 1
 fi
 
+mkdir out
+chgrp keytest out
+chmod g+rw keytest out
+
 mkdir /var/cache/keytest
 if [ -z "$SUDO_USER" ]
 then
@@ -71,8 +75,10 @@ then
 	done
 	mkdir -p /etc/keytest
 	(cd $KT; pwd) > /etc/keytest/dir
+fi 
 
-if ! mount | egrep ' / .*(rel|no)atime'
+# Is noatime enabled by default now?
+if false # ! mount | egrep ' / .*(rel|no)atime'
 then
 	echo -----------------------------------------
  	echo - WARNING!!!!
