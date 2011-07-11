@@ -90,3 +90,16 @@ then
 	echo -   * Increase the wear and tear on your harddisk
 	echo -----------------------------------------
 fi
+
+echo
+if [ ! -e local_keytest.rc ]
+then
+
+	echo local_keytest.rc does not exist. Copy from local_keytest.rc.example and customise!!!
+fi
+
+if [ ! -e shared_variables.sh ]
+then	
+   echo shared_variables.sh does not exist!!!
+   echo "   " Copy and customise one of: shared_variables-*.sh
+fi
