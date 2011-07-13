@@ -751,7 +751,8 @@ sanity_checks () {
  check_can_write "$TMP_DIR"
  check_can_write "$TMP_DIR"/kt_dir
 
- if ! test -z "`pylint -e $DIRNAME0/keytest.py`" 
+# I am sure that -e (lower case) used to be correct) has the syntax changed?
+ if ! test -z "`pylint -E $DIRNAME0/keytest.py`" 
  then
 	CRITICAL "$DIRNAME0/keytest.py" has python errors
 	exit

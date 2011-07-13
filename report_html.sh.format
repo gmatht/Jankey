@@ -18,7 +18,7 @@ CPP_HTML_DIR_REL=cpp_html
 CPP_HTML_DIR=$OUT/cpp_html
 
 LYX_VER=`$GET_VERSION_COMMAND 2>&1 | head -n1 | sed s/^LyX\ // | sed s/\ .*// | sed s/1svn/0/ | sed s/2svn/1/ | sed s/3svn/2/ | sed s/4svn/3/ | sed s/5svn/4/ | sed s/6svn/5/ | sed s/7svn/6/ | sed s/8svn/7/ | sed s/9svn/8/`
-BOILER_PLATE=`cd $SRC_DIR ; svn info 2>&1 | grep Revision || git --no-pager log --max-count=1 | head -n1 | sed s/.*\ //g`
+BOILER_PLATE=`(cd $SRC_DIR ; svn info 2>&1 | grep Revision || git --no-pager log --max-count=1 | head -n1 | sed s/.*\ //g) || echo NO_SRC dir?`
 
 tidy_keycode () {
 #sed 's/\\/\\\\/g' | 

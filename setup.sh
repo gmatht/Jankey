@@ -7,6 +7,10 @@ then
 	exit 1
 fi
 
+mkdir out
+chgrp keytest out
+chmod g+rw keytest out
+
 mkdir /var/cache/keytest
 if [ -z "$SUDO_USER" ]
 then
@@ -71,8 +75,10 @@ then
 	done
 	mkdir -p /etc/keytest
 	(cd $KT; pwd) > /etc/keytest/dir
+fi 
 
-if ! mount | egrep ' / .*(rel|no)atime'
+# Is noatime enabled by default now?
+if false # ! mount | egrep ' / .*(rel|no)atime'
 then
 	echo -----------------------------------------
  	echo - WARNING!!!!
@@ -83,4 +89,17 @@ then
 	echo -   * Greatly slow down your forground tasks.
 	echo -   * Increase the wear and tear on your harddisk
 	echo -----------------------------------------
+fi
+
+echo
+if [ ! -e local_keytest.rc ]
+then
+
+	echo local_keytest.rc does not exist. Copy from local_keytest.rc.example and customise!!!
+fi
+
+if [ ! -e shared_variables.sh ]
+then	
+   echo shared_variables.sh does not exist!!!
+   echo "   " Copy and customise one of: shared_variables-*.sh
 fi
