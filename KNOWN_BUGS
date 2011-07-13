@@ -1,0 +1,13 @@
+--------------------------------------------------------------
+Known Bug: K1
+
+Sometimes keytest will freeze, and  watch_keytest.sh will display a huge "age" (time since keytest was responsive) like:
+
+$ ./watch_keytest.sh | head
+TMP_DIR tmpfs/keytest/out/t20/
+NOW_SEC 1310544433 vs 1310386857 (AGE: 157576)
+...
+
+You can fix this by running:
+ sudo -u keytest killall  -9 lyx
+
