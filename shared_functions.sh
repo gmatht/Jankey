@@ -178,10 +178,10 @@ extras_prepare () {
 get_crash_id () {
 if [ "$KEYTEST_HARDCODE" = LYX ]
 then
-  name=`(grep -o ' in lyx::[[:alnum:]:]*' < $GDB ; grep -o ' [ai][nt] [[:alnum:]:]*' < $GDB ; grep .-CRITICAL < $GDB ) |  grep -v -i assert | head -n4 | sed s/in// | sed 's/ //g'`
+  name=`(grep SIG.... -o < $GDB ; grep -o ' in lyx::[[:alnum:]:]*' < $GDB ; grep -o ' [ai][nt] [[:alnum:]:]*' < $GDB ; grep .-CRITICAL < $GDB ) |  grep -v -i assert | head -n4 | sed s/in// | sed 's/ //g'`
   echo $name | sed 's/ /__/g'
 else #remove this else as grep -o lyx is harmless?
-  name=`(grep -o ' in lyx::[[:alnum:]:]*' < $GDB ; grep -o ' [ai][nt] [[:alnum:]:]*' < $GDB ; grep .-CRITICAL < $GDB) |  grep -v -i assert | head -n4 | sed s/in// | sed 's/ //g'`
+  name=`(grep SIG.... -o < $GDB ; grep -o ' in lyx::[[:alnum:]:]*' < $GDB ; grep -o ' [ai][nt] [[:alnum:]:]*' < $GDB ; grep .-CRITICAL < $GDB) |  grep -v -i assert | head -n4 | sed s/in// | sed 's/ //g'`
   echo $name | sed 's/ /__/g'
 fi
 
@@ -411,9 +411,12 @@ jobs
 # *** glibc detected *** /mnt/big/keytest/lyx/src/lyx: double free or corruption (!prev): 0x0000000005c34ed0 ***
 # Traceback (most recent call last):
 interesting_crash () {
+CRASH_ID=`get_crash_id`
 echo interesting_crash $GDB , $KEYCODE , =  "$WANT_CRASH_ID" = `get_crash_id`
 (grep '\( signal SIG[^TK]\|Assert [*]\|.-CRITICAL\|Traceback .most recent call last.:\)' $GDB || grep KILL_FREEZE $KEYCODE) &&
-   ( test -z "$WANT_CRASH_ID" || test "$REPRODUCE_ANY" = y || test "$WANT_CRASH_ID" = `get_crash_id` )
+   ( test -z "$WANT_CRASH_ID" || test "$REPRODUCE_ANY" = y || test "$WANT_CRASH_ID" = `get_crash_id` ||
+      ( (echo $WANT_CRASH_ID | grep XCPU) && (echo $CRASH_ID | grep XCPU)  )
+   )
 }
 
 #get_pid() {
