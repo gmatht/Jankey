@@ -9,7 +9,7 @@
 #src/lyx $WL/t2.lyx $WL/t0.lyx &
 #WINDOW_NAME=WrongLine.sh.t2.lyx
 
-set -x
+#set -x
 
 TMPFILE=/tmp/lyx-code.txt
 WINDOW_NAME="LyX: ..."
@@ -35,23 +35,35 @@ echo PWD `pwd`
 #`pwd`_bin/bin/lyx $0.t2.lyx $0.t0.lyx &
 #$EXE 2> $TMPFILE.err > $TMPFILE & #./WrongLine.sh.t2.lyx ./WrongLine.sh.t0.lyx &
 pwd
-echo "time $EXE 2> $TMPFILE.err  &" #./WrongLine.sh.t2.lyx ./WrongLine.sh.t0.lyx &
+echo "time -o $TMPFILE.time $EXE 2> $TMPFILE.err  &" #./WrongLine.sh.t2.lyx ./WrongLine.sh.t0.lyx &
 rm $TMPFILE.lyx
+rm $TMPFILE.lyx.emergency
 
-/usr/bin/time $EXE $TMPFILE.lyx 2> $TMPFILE.err  &#./WrongLine.sh.t2.lyx ./WrongLine.sh.t0.lyx &
+/usr/bin/time -o $TMPFILE.time  $EXE $TMPFILE.lyx 2> $TMPFILE.err  &#./WrongLine.sh.t2.lyx ./WrongLine.sh.t0.lyx &
 #(time $EXE 2> $TMPFILE.err)  & #./WrongLine.sh.t2.lyx ./WrongLine.sh.t0.lyx &
-LYX_PID=`ps  -o pid,ppid | grep \ $! | sed s/\ .*//$!` # Get child of time process
-echo LYX_PID=$LYX_PID
+LYX_PID=`ps  -o pid,ppid | grep \ $!  | sed s/\ .*//` # Get child of time process
+echo .LYX_PID=$LYX_PID.
 echo NO_CLIP | xclip 
 #while ! (wmctrl -F -R LyX || wmctrl -F -R lyx)
-while ! (wmctrl -R "LyX: $TMPFILE.lyx")
+#while ! (wmctrl -R "LyX: $TMPFILE.lyx")
+i=0
+while ! (wmctrl -R "LyX")
 do
+	i=$(($i+1))
 	sleep 0.1
+	echo -n w$i
+	if [ "$i" -gt 1000 ]
+	then
+		kill $LYX_PID
+		sleep 1
+		kill -9 $LYX_PID
+		exit
+	fi
 done
 sleep 0.1
 #for K in `echo '\Af n \Cs . . } \As RR \Ao RR \CD \[Escape] \Cq'`
 #for K in `echo '\Cn \D9 \Ai \D9  n \D9  n \D9 nnn \D9 \[Right] asdf \D9 \r \r iadsf \Ca \Cc \Cv \Cv  \Ca \Cc \Cv \Cv \Ca \Cc \Cv \Cv \Ca \Cc \Cv \Cv \Ca \Cc \Cv \Cv \Ca \Cc \Cv \Cv \Ca \Cc \Cv \Cv \Ca \Cc \Cv \Cv \Ca \Cc \Cv \Cv \Ca \Cc \Cv \Cv \Ca \Cc \Cv \Cv \Ca \Cc MEMINFO \Cq \Cs \Ad \Ad'`
-for K in `echo '\Ai n n nnn \[Right] asdf \r \r iadsf \Ca \Cc \Cv \Cv  \Ca \Cc \Cv \Cv \Ca \Cc \Cv \Cv \Ca \Cc \Cv \Cv \Ca \Cc \Cv \Cv \Ca \Cc \Cv \Cv \Ca \Cc \Cv \Cv \Ca \Cc \Cv \Cv \Ca \Cc \Cv \Cv \Ca \Cc \Cv \Cv \Ca \Cc \Cv \Cv \Ca \Ca \Cc \Cv \Cv \Ca \Cc \Cv \Cv \Cc MEMINFO \Cq \Cs \Ad \Ad'`
+for K in `echo '\Ac \D1 \Ac \D9 \D9 \Ao \Ai n n nnn \[Right] asdf \r \r iadsf \Ao \Ca \D9 \Cc \Cv \Cv \Ca \Cc \Cv \Cv \Ca \Cc \Cv \Cv \Ca \Cc \Cv \Cv \Ca \Cc \Cv \Cv \Ca \Cc \Cv \Cv \Ca \Cc \Cv \Cv \Ca \Cc \Cv \Cv \Ca \Cc \Cv \Cv \Ca \Cc \Cv \Cv \Ca \Cc \Cv \Cv \Ca \Ca \Cc \Cv \Cv \Ca \Cc \Cv \Cv \Cc MEMINFO \Cq \Cs \Ad \Ad'`
 do
 	if [ "$K" = RR ]
 	then
@@ -66,14 +78,31 @@ do
 	else
 		while test -e "/proc/$LYX_PID/status" && ! grep 'S .sleeping.' "/proc/$LYX_PID/status"
 		do
+			echo -n s
 			sleep 0.1
 		done
+
+			
+
 		if [ "$K" = END -a  ! -e "/proc/$LYX_PID/status" ]
 		then
 			cat "/proc/$LYX_PID/status"
 			#exit 125 # Not good or bad, just ugly.
 		fi
-		xvkbd -xsendevent -text "$K"
+
+		if wmctrl -R "Document class not available"
+		then
+			xvkbd -xsendevent -text "\Ao"
+		fi
+
+		#xvkbd -xsendevent -text "$K"
+		if echo "$K" | grep C
+		then 
+			echo -- xvkbd -xsendevent -text "$K"
+			xvkbd -text "$K"
+		else
+			xvkbd -xsendevent -text "$K"
+		fi
 	fi
 	sleep 0.1
 done
@@ -86,7 +115,11 @@ wmctrl -R "LyX: Save" ;sleep 0.3; xvkbd -xsendevent -text '\Ad'; sleep 0.3
 #wmctrl -R "LyX: Save" ;sleep 0.3; xvkbd -xsendevent -text '\Ad'; sleep 0.3
 #xvkbd -xsendevent -text '\Cs\D9\D9.\D9\D9c\D9\D9\Ad\D9\D9\D9s\D9\D9\Ac\D9\D9\AD\D9\D9\D9\D9\D9\[Escape]\D9\D9\[Escape]'
 #sleep 2
-sleep 3 ; kill $! ; sleep 3 ; kill -9 $!  &
+sleep 0.3
+kill $LYX_PID
+sleep 0.3
+kill -9 $LYX_PID
+sleep 0.3 ; kill $! ; sleep 0.3 ; kill -9 $!  &
 cat $TMPFILE.err
 #if grep "terminate called without an active exception" < $TMPFILE.err 
 #then
