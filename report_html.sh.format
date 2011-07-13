@@ -157,11 +157,11 @@ get_description() {
 		ii=$((ii+1))
 	done
 
- 	if ls $f_base.s*.png > /dev/null
-        then
-		echo
-                echo "Alternatively, see the [[$URL_OF_OUT/$SEC.screenshot.html Screenshots]]"
- 	fi
+ 	#if ls $f_base.s*.png > /dev/null
+        #then
+	#	echo
+        #        echo "Alternatively, see the [[$URL_OF_OUT/$SEC.screenshot.html Screenshots]]"
+ 	#fi
 
 	if [ -e out/cache-bisect/store/$SEC.KEYCODEpure ]
 	then
@@ -179,7 +179,7 @@ get_description() {
 	svn_revision $f_base
 	echo
 	echo '{{{'
-	cat $g | head -n 40 # If we do not limit length we may get "too long url" errors.
+	cat $g | head -n 22 # If we do not limit length we may get "too long url" errors.
 	echo '}}}'
 	echo
 	echo For more info see the "[[$URL_OF_OUT/$HTML_NAME Keytest Report]]" ) | tee $OUT/$SEC.txt
