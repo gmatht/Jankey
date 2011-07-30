@@ -22,8 +22,8 @@ fi
 
 KT=`dirname "$0"`
 # I haven't tested whether this will work on an RPM based distro. Easy to fix though.
-apt-get install xclip xvkbd wmctrl xvfb libqt4-dbg icewm || #svn pylint
-	yum install xclip xvkbd wmctrl xvfb libqt4-dbg icewm
+apt-get install xserver-xephyr xclip xvkbd wmctrl xvfb libqt4-dbg icewm || #svn pylint
+	yum install xserver-xephyr xclip xvkbd wmctrl xvfb libqt4-dbg icewm
 adduser keytest < /dev/null
 adduser keytest2 < /dev/null
 addgroup keytest2 keytest
