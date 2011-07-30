@@ -16,7 +16,13 @@ fi
 #Xvfb :$d -ac -screen 0 800x600x24 -wr
 echo 1
 # Xvfb :$d -ac -screen 0 800x600x24 -wr &
-Xvfb :$d -ac -screen 0 800x600x24 -wr &
+USE_XEPH="y"
+if [ ! -z "$USE_XEPH" ]
+then
+	Xephyr :$d -ac -screen 800x600 &
+else
+	Xvfb :$d -ac -screen 0 800x600x24 -wr &
+fi
 
 echo 2
 echo export DISPLAY=:$d
