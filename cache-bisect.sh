@@ -12,6 +12,10 @@ RECIPE is a keycode can be a KEYCODEpure file. Since
 the report_html interface is html, as a convienence you can enter
 RECIPE as a URL to a locally stored KEYCODEpure file, and 
 we will try to convert it to a local file name.
+
+Run as "ANY_CRASH=y $0 ..." if you don't want it to only consider
+crashes that match the original backtrace.
+
 "
 	exit 1
 fi
