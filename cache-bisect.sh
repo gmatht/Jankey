@@ -72,7 +72,7 @@ set | grep  TEST_FILE=
 
 
 
-KT=`dirname $0`
+export KT=`dirname $0`
 echo KT $KT 
 cd $KT || exit
 KT=`pwd`
