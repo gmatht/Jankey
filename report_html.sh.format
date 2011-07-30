@@ -31,7 +31,7 @@ do
 	then
 		echo -n '\[!Loop]'
 	else
-		printf '%s' "$k" | sed 's/^KK: //'
+		printf '%s' "$k" | sed 's/^KK: //' | sed 's/^KO: //'
 	fi
 done
 }
