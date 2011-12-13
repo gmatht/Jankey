@@ -103,3 +103,5 @@ then
    echo shared_variables.sh does not exist!!!
    echo "   " Copy and customise one of: shared_variables-*.sh
 fi
+
+sudo -u keytest ./commands.sh add_autokill_crontab
