@@ -42,8 +42,6 @@ stop () {
 	echo stop
 	sudo -H -u keytest killall Xvfb || true
 	sleep 1
-	sudo -H -u keytest killall -9 Xvfb || true
-	sleep 1
 	sudo -H -u keytest $KT/killtest.sh || true
 	#(cd /mnt/big/xp/images/share/Ubuntu904/keytest &&
 	(cd $KT &&
@@ -51,7 +49,9 @@ stop () {
 		sudo -H -u keytest ./store_task_data.sh 
 	)
 	kill `ps gaux | grep "^keytest " | awk '{print $2}'` || true
-	sleep 2
+	sleep 1
+	sudo -H -u keytest killall -9 Xvfb || true
+	killall cyclelog.sh || true
 	kill -9 `ps gaux | grep "^keytest " | awk '{print $2}'` || true
 }
 
