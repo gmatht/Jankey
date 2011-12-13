@@ -69,6 +69,7 @@ make_cmd='(export PATH=/mnt/big/keytest/path/bin:$PATH; pwd; sed -i.bak "s/fgets
 make_cmd='(make distclean ; make clean ; rm -r autom4te.cache ; rm aclocal.m4 ;  export PATH=/usr/lib/ccache/:/mnt/big/keytest/path/bin:$PATH && sed -i.bak s/0-[34]/0-5/ ./autogen.sh && ./autogen.sh && CXX=g++-4.2 CC=gcc-4.2 CXXFLAGS=-Os CFLAGS=-Os ./configure --enable-debug --prefix=`pwd`_bin && nice -19 make -j2 && nice -19 make install) | tee MAKE.LOG'  #&& make clean'
 make_cmd='(make distclean ; make clean ; rm -r autom4te.cache ; rm aclocal.m4 ;  export PATH=/var/cache/keytest/lyx-devel.cache/26000.path:$PATH && sed -i.bak s/0-[34]/0-5/ ./autogen.sh && ./autogen.sh && CXX=g++-4.2 CC=gcc-4.2 CXXFLAGS=-Os CFLAGS=-Os ./configure --enable-debug --prefix=`pwd`_bin && nice -19 make -j2 && nice -19 make install) | tee MAKE.LOG'  #&& make clean'
 make_cmd='(make distclean ; make clean ; rm -r autom4te.cache ; rm aclocal.m4 ;  sed "s/exit 1/#exit 1/g" < autogen.sh > autogen_noexit.sh && chmod +x ./autogen_noexit.sh  ; svn revert -R lib/doc lib/examples po/ && export PATH=/usr/lib/ccache/:/mnt/big/keytest/path/bin:$PATH  &&  sed -i.bak s/0-[34]/0-5/ ./autogen.sh && ./autogen_noexit.sh && CXX=g++-4.2 CC=gcc-4.2 CXXFLAGS=-Os CFLAGS=-Os ./configure --enable-debug --prefix=`pwd`_bin && nice -19 make -j2 && nice -19 make install) | tee MAKE.LOG'  #&& make clean'
+#make_cmd='(make distclean ; make clean ; rm -r autom4te.cache ; rm aclocal.m4 ;  sed "s/exit 1/#exit 1/g" < autogen.sh > autogen_noexit.sh && chmod +x ./autogen_noexit.sh  ; svn revert -R lib/doc lib/examples po/ && export PATH=/usr/lib/ccache/:/mnt/big/keytest/path/bin:$PATH  &&  sed -i.bak s/0-[34]/0-5/ ./autogen.sh && ./autogen_noexit.sh && CXX=g++-4.2 CC=gcc-4.2 CXXFLAGS=-Os --without-included-boost CFLAGS=-Os ./configure --enable-debug --prefix=`pwd`_bin && nice -19 make -j2 && nice -19 make install) | tee MAKE.LOG'  #&& make clean'
 make_cmd=os.environ.get('MAKE_CMD')
 
 reverse_search = True
@@ -200,18 +201,20 @@ def make_ver(new_v, old_v=None, alt_v=None):
 	print >> outfile, "old_d = source_dir = " , old_d
     else:
         old_d = ver2dir(old_v)
+	old_d = os.path.realpath(old_d)
 	if is_built(old_d) and os.path.exists(old_d):
         # remove all the files that are built rather than part of the svn tree
         # We could also remove all of the non-svn files wit something like the following line
 	    #os.system("cd " + old_d + " && for d in ` find . -type d | grep -v '/.svn'` ; do svn status|egrep '^\?'|awk '{print $2}'|xargs rm -rf; done")
 	    print "OLD_D", old_d
-            check_call("! test -L "+old_d, shell=True)
+            #check_call("! test -L "+old_d, shell=True) # We should be able to 
             #check_call("test -e /mnt/modern/xp/src/lyx-devel/src/lyx", shell=True)
             #call(['make', 'distclean'], cwd=old_d)
             if not keep_src_dirs:
                 call('cd ' + old_d + ' && make distclean', shell=True)
 	        print "OLD_D2", old_d
-                check_call("! test -L "+old_d, shell=True)
+                #check_call("! test -L "+old_d, shell=True) ... use real path to eliminate links instead of throwing an error
+
                 ##check_call("test -e /mnt/modern/xp/src/lyx-devel/src/lyx", shell=True)
                 call('cd ' + old_d + ' && make clean', shell=True)
                 #call(['make', 'clean'], cwd=old_d)
@@ -233,7 +236,8 @@ def make_ver(new_v, old_v=None, alt_v=None):
         call(['rm', '-rf', tmp_d + '.cp'])
 	print "Copying " + old_d + " to " + new_d
 	print >> outfile, "Copying " + old_d + " to " + new_d
-	
+	old_d = os.path.realpath(old_d)
+			
 	#if (old_v is not None) and ver_stored(old_v):
 	if ver_stored(old_v):
 		#This could leave partial copies around, I should really use a tmpdir
