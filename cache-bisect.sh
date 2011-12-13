@@ -1,4 +1,5 @@
 set -e
+#ANY_CRASH="y"
 
 if [ -z "$1" ]
 then 
@@ -97,14 +98,27 @@ then
 	echo GDB_FILE $GDB_FILE
 
 	CRASH=`grep -o lyx::[:[:alnum:]]* < $GDB_FILE| grep -v -i "assert" | grep -v "lyx::lyx" | head -n1`
+	
+	if grep SIGXCPU $GDB_FILE
+	then
+		CRASH=SIGXCPU
+	fi
 
 	KEYCODEpure_cp="$BISECT_TMP_DIR"/`basename $KEYCODEpure`
 	cp $KEYCODEpure $KEYCODEpure_cp
 
-	TEST_COMMAND="$KT/reproduce.sh $KEYCODEpure_cp $CRASH"
+	if [ "$ANY_CRASH" = y ]
+	then
+		TEST_COMMAND="$KT/reproduce.sh $KEYCODEpure_cp"
+	else
+		TEST_COMMAND="$KT/reproduce.sh $KEYCODEpure_cp $CRASH"
+	fi
 	echo CRASH $CRASH
 elif echo "$TEST_FILE" | grep '.sh$'
 then
+	mkdir -p $KT/tmpfs/cache-bisect/
+	chgrp keytest $KT/tmpfs/cache-bisect || true
+	chmod g+w $KT/tmpfs/cache-bisect || true
 	echo TEST_FILE "$TEST_FILE"
 	echo "$TEST_FILE"* "$KT/tmpfs/cache-bisect/"
 	cp "$TEST_FILE"* "$KT/tmpfs/cache-bisect/"
