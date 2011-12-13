@@ -88,7 +88,7 @@ echo $LATEST_FILE | (
  ) || (
 	ls $OUT/* -lotd | head
  )
-)
+) | head -n 24
 
 false && tail -n 10000 $LOG_FILE | grep -F "autolyx:
 Trace
