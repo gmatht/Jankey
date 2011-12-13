@@ -16,7 +16,7 @@ fi
 #Xvfb :$d -ac -screen 0 800x600x24 -wr
 echo 1
 # Xvfb :$d -ac -screen 0 800x600x24 -wr &
-USE_XEPH="y"
+#USE_XEPH="y"
 if [ ! -z "$USE_XEPH" ]
 then
 	Xephyr :$d -ac -screen 800x600 &
@@ -31,7 +31,7 @@ sleep 1
 echo will wait for XSERVER to start
 while ! xwininfo -root 
 do
-	echo waiting for xserver to start 
+	echo waiting for xserver to start on :$d
 	sleep 1
 done
 sleep 5
