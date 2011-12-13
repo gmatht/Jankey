@@ -6,14 +6,19 @@ presses, and collect the crash results.
 Since the code involves spamming random keypresses, I run it under a special
 user "keytest", well away from my main X windows session.
 
-To use this software, first configure it by editing the 
-configuration parameters in shared_functions.sh and shared_variables.sh
-then run the following:
+To use this software, you will want to run the following commands:
 
-./setup.sh   # add keytest user and apt-get required files
-sudo -H -u keytest -e xterm # Create a xterm for running keytest in
-. ./initXvfb # sets up a fake X server for keytest to play in
-./main.sh
+git clone https://github.com/gmatht/Jankey.git
+cd Jankey 
+cp local_keytest.rc.example local_keytest.rc
+gedit shared_variables.sh local_keytest.rc
+#Edit the configuration files and save
+sudo ./setup.sh   # add keytest user and apt-get required files
+sudo ./S99keytest start  # This should start keytest running
+watch ./watch_keytest.sh # This command shows you what is going on
+                         # Age should hover below several seconds
+./report_html.sh  # Generate an HTML list of the bugs found.
+
 
 Note that this bug finding software is itself quite buggy.
 
@@ -163,11 +168,17 @@ config/dbus] couldn't take over org.x.config: org.freedesktop.DBus.Error.AccessD
 
 A: because you haven't listed the X-server in /etc/dbus-1/system.d/xorg-server.conf
 
+BUGS:
+If we have [6,7,8] as possible bisect versions, and [6] is ugly we get [7,8] as sole remaining versions. This is wrong.
+
 AUTHOR:
 Copyright (C) 2009 John McCabe-Dansted, gmatht at gmail dot com.
 Published under the Gnu General Public Licence, version 2 or later.
+http://dansted.co.cc/Mon-Keytest.html
 
 LyX should work with the following versions of autoconf and automake:
 http://ftp.gnu.org/gnu/autoconf/autoconf-2.61.tar.bz2
 ftp://ftp.gnu.org/gnu/automake/automake-1.10.1.tar.bz2
+
+
 
