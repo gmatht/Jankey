@@ -1,5 +1,6 @@
 . ./shared_variables.sh
 OUT=$ROOT_OUTDIR
+set -x
 if [ "$1" = "-f" ]
 then
   FORCE=yes
