@@ -1,4 +1,4 @@
-!/bin/sh
+#!/bin/bash
 KT=`dirname $0`
 . $KT/shared_variables.sh
 if [ ! -z "$1" ]
@@ -17,11 +17,14 @@ AGE=$(($NOW_SEC-$LATEST_SEC))
 if [ "$AGE" -gt 1800 ] #running more than 1/5 and hour
 then
 	echo AGE too old!!!
+	echo EN $EXE_NAME
 	. $KT/shared_functions.sh
 	#maybe the next four lines should be made a function?
 	kill_exe
 	killall gdb
+	killall $EXE_NAME
 	sleep 0.2
+	killall -9 $EXE_NAME
 	killall -9 gdb 
 fi
 
