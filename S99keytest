@@ -73,7 +73,7 @@ start () {
 	mount tmpfs $TMPFS -t tmpfs -o size=400m
  fi
   
- echo making tmpfs/CRITICAL as $USER !!!!!!!!
+ echo making tmpfs/CRITICAL as $USER #!!!!!!!!
  touch tmpfs/CRITICAL
  chown keytest tmpfs/CRITICAL
  chgrp keytest tmpfs/CRITICAL
