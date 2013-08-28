@@ -19,9 +19,16 @@ EXE_NAME=lyx
 LYX_WINDOW_NAME=lyx
 #export RAISE_WINDOW_CMD="./focus -R $LYX_WINDOW_NAME"
 export RAISE_WINDOW_CMD="wmctrl -R $LYX_WINDOW_NAME"
-if [ -z $SRC_DIR ]
+echo SRC $SRC_DIR
+if [ -z "$SRC_ROOT" ] 
 then
-	SRC_DIR=lyx/src
+	SRC_ROOT=/mnt/big/keytest/lyx
+fi
+
+if [ -z "$SRC_DIR" ]
+then
+	#SRC_DIR=lyx/src
+	SRC_DIR=$SRC_ROOT/src
 fi
 if [ -z $EXE_TO_TEST ]
 then
@@ -40,7 +47,7 @@ fi
 GET_VERSION_COMMAND="$EXE_TO_TEST -version"
 #SRC_ROOT=`pwd`/$SRC_ROOT
 #SRC_ROOT=/var/cache/keytest/lyx-devel
-SRC_ROOT=/mnt/big/keytest/lyx
+#SRC_ROOT=/mnt/big/keytest/lyx.gitbisect
 export SRC_ROOT
 export EXE_NAME
 export KEYTEST_HARDCODE=LYX
