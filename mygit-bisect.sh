@@ -165,8 +165,16 @@ DISPLAY=:$D xwininfo -root > /dev/null 2> /dev/null ||
 	git checkout po/
 	git bisect start
 	git bisect good 2.0.0
-	git bisect bad HEAD
-DISPLAY=:$D LYX_NO_BACKTRACE_HELPER="y" git bisect run "$KT/mygit-runner.sh" $TEST_COMMAND
+	#git bisect bad HEAD
+	git bisect bad 0b6edb0b2fb3773af8506a17ddcadf219dfc7e5b
+	echo '#!/bin/bash
+export PATH=/usr/lib/ccache/:$PATH
+git checkout po/
+(./autogen.sh && ./configure && nice make -j3) || exit 125
+./git_keytest.sh' > git_run.sh
+echo sudo -H -u ./git_altuser.sh > ./git_keytest.sh
+echo DISPLAY=:$D LYX_NO_BACKTRACE_HELPER="y" sudo -H -u "$BISECT_AS_USER" "$KT/doNtimes.sh" $count $TEST_COMMAND > ./git_altuser.sh
+chmod +x git_run.sh git_keytest.sh ./git_altuser.sh
 
 ) #2>&1 | tee $KEYCODEpure.full_bisect_log
 
